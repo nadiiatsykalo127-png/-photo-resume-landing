@@ -183,7 +183,10 @@
   .compare .divider{
     position:absolute; top:0; bottom:0; left:52%;
     width:2px; background: rgba(255,255,255,0.85);
+    cursor: ew-resize;
+    touch-action: none;
   }
+  .compare{ cursor: ew-resize; }
   .compare .divider::after{
     content:"⇆";
     position:absolute; top:50%; left:50%;
@@ -385,16 +388,16 @@
       </div>
     </div>
 
-    <div class="compare">
+    <div class="compare" id="compareSlider">
       <div class="pane before">
         <span class="tag">До</span>
         <img src="before.jpg" alt="Фото до обробки" style="width:100%; height:100%; object-fit:cover;">
       </div>
-      <div class="pane after">
+      <div class="pane after" id="afterPane">
         <span class="tag">Після</span>
         <img src="after1.jpg" alt="Фото після обробки — ділова сорочка, блакитний фон" style="width:100%; height:100%; object-fit:cover;">
       </div>
-      <div class="divider"></div>
+      <div class="divider" id="compareDivider"></div>
     </div>
   </div>
 </header>
@@ -528,5 +531,43 @@
   </div>
 </footer>
 
+<script>
+(function(){
+  var wrap = document.getElementById('compareSlider');
+  var afterPane = document.getElementById('afterPane');
+  var divider = document.getElementById('compareDivider');
+  if(!wrap || !afterPane || !divider) return;
+
+  var dragging = false;
+
+  function setPosition(clientX){
+    var rect = wrap.getBoundingClientRect();
+    var pct = ((clientX - rect.left) / rect.width) * 100;
+    pct = Math.max(4, Math.min(96, pct));
+    afterPane.style.clipPath = 'inset(0 0 0 ' + pct + '%)';
+    divider.style.left = pct + '%';
+  }
+
+  function onDown(e){
+    dragging = true;
+    var x = e.touches ? e.touches[0].clientX : e.clientX;
+    setPosition(x);
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!dragging) return;
+    var x = e.touches ? e.touches[0].clientX : e.clientX;
+    setPosition(x);
+  }
+  function onUp(){ dragging = false; }
+
+  wrap.addEventListener('mousedown', onDown);
+  wrap.addEventListener('touchstart', onDown, {passive:false});
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, {passive:false});
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
+})();
+</script>
 </body>
 </html>
