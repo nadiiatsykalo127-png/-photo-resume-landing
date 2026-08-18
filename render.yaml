@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: nadinartdigital-career
+    runtime: node
+    region: frankfurt
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    disk:
+      name: career-private-data
+      mountPath: /var/data
+      sizeGB: 1
+    domains:
+      - nadinartdigital.com.ua
+      - www.nadinartdigital.com.ua
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PUBLIC_BASE_URL
+        value: https://nadinartdigital.com.ua
+      - key: DATA_DIR
+        value: /var/data
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MONO_X_TOKEN
+        sync: false

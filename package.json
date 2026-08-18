@@ -1,0 +1,20 @@
+{
+  "name": "nadinartdigital-career",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node --watch server.mjs",
+    "start": "node server.mjs",
+    "check": "node --check server.mjs && node --check public/assets/photo.js && node --check public/assets/resume.js"
+  },
+  "dependencies": {
+    "@google/genai": "^1.28.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.4"
+  }
+}
