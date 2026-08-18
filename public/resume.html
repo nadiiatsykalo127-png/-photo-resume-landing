@@ -1,1 +1,69 @@
-<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Конструктор резюме — AI для кар’єри</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/app.css"></head><body><header class="top"><div class="wrap"><a class="brand" href="/career">AI для кар’єри</a><a class="back" href="/career">← На головну</a></div></header><section class="intro"><span class="eyebrow">Безкоштовний конструктор</span><h1>Створіть резюме під ваш досвід</h1><p>Усі три формати безкоштовні. Оберіть профіль, заповніть дані, відредагуйте підказки та завантажте документ.</p></section><main class="wrap"><section id="profiles" class="profiles"><button class="profile card" data-type="civilian"><span class="profile-icon">◇</span><h2>Цивільний досвід</h2><p>Зрозуміле резюме для цивільної кар’єри та пошуку нової роботи.</p><span class="free">Безкоштовно →</span></button><button class="profile card" data-type="civilian_military"><span class="profile-icon">✦</span><h2>Цивільний + військовий</h2><p>Перекладає досвід служби мовою цивільних компетенцій без знецінення.</p><span class="free">Безкоштовно →</span></button><button class="profile card" data-type="medical"><span class="profile-icon">＋</span><h2>Медичний працівник</h2><p>Структура для лікарів, медсестер, фельдшерів та інших фахівців.</p><span class="free">Безкоштовно →</span></button></section><section id="builder" class="builder"><div class="panel card editor"><h2 id="builderTitle">Цивільне резюме</h2><p class="small">Дані одразу з’являються у попередньому перегляді.</p><form id="form" class="form"><div class="field"><label for="name">Ім’я та прізвище</label><input id="name" name="name"></div><div class="field"><label for="role">Бажана посада</label><input id="role" name="role"></div><div class="field"><label for="email">Email</label><input id="email" name="email" type="email"></div><div class="field"><label for="phone">Телефон</label><input id="phone" name="phone"></div><div class="field"><label for="city">Місто</label><input id="city" name="city"></div><div class="field"><label for="profile">Профіль</label><select id="profile" name="profile"><option value="civilian">Цивільний</option><option value="civilian_military">Цивільний + військовий</option><option value="medical">Медичний</option></select></div><div class="field full"><label for="summary">Про себе / професійна мета</label><textarea id="summary" name="summary"></textarea></div><div class="field full"><label id="experienceLabel" for="experience">Досвід роботи</label><textarea id="experience" name="experience" placeholder="Посада, організація, період, основні результати"></textarea></div><div class="field full"><label for="education">Освіта та навчання</label><textarea id="education" name="education"></textarea></div><div class="field full"><label for="skills">Навички</label><textarea id="skills" name="skills" placeholder="Через кому"></textarea></div><div class="field full vacancy"><label for="vacancy">Текст вакансії для адаптації (необов’язково)</label><textarea id="vacancy" name="vacancy"></textarea></div></form><div class="ai-row"><button id="assist" class="btn">Допомогти з текстом</button><span id="aiStatus" class="small"></span></div><div class="actions"><button id="pdf" class="btn">Зберегти PDF</button><button id="doc" class="btn">Завантажити DOC</button><button id="clear" class="btn" style="background:#75809a">Очистити</button></div><div class="note">AI не вигадує досвід: перевірте запропонований текст перед завантаженням.</div></div><div class="panel card builder-preview"><article id="paper" class="paper"><h1 id="pName">Ваше ім’я</h1><div id="pRole" class="role">Бажана посада</div><div id="pContact" class="contact">email • телефон • місто</div><div class="section"><h3>Профіль</h3><div id="pSummary" class="empty">Заповніть розділ ліворуч</div></div><div class="section"><h3 id="pExperienceTitle">Досвід роботи</h3><div id="pExperience" class="empty">Заповніть розділ ліворуч</div></div><div class="section"><h3>Освіта</h3><div id="pEducation" class="empty">Заповніть розділ ліворуч</div></div><div class="section"><h3>Навички</h3><div id="pSkills" class="empty">Заповніть розділ ліворуч</div></div></article></div></section></main><div class="legal-links"><a href="/career/oferta">Публічна оферта</a><a href="/career/privacy">Конфіденційність</a><a href="https://forms.gle/Shp2k2sa2SBpRJQY7" target="_blank" rel="noopener">Зворотний зв’язок</a></div><script src="/assets/resume.js" defer></script></body></html>
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Конструктор резюме — AI для кар’єри</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <header class="top"><div class="wrap"><a class="brand" href="/career">AI для кар’єри</a><a class="back" href="/career">← На головну</a></div></header>
+  <section class="intro resume-intro"><span class="eyebrow">Безкоштовний конструктор</span><h1>AI допомагає почати — ви вирішуєте, що залишити</h1><p>Вкажіть посаду та факти про себе. AI запропонує професійні формулювання, які можна повністю редагувати.</p></section>
+  <main class="wrap">
+    <section id="profiles" class="profiles">
+      <button class="profile card" data-type="civilian"><span class="profile-icon">◇</span><h2>Цивільний досвід</h2><p>Резюме для цивільної кар’єри та пошуку нової роботи.</p><span class="free">Безкоштовно →</span></button>
+      <button class="profile card" data-type="civilian_military"><span class="profile-icon">✦</span><h2>Цивільний + військовий</h2><p>Перекладає досвід служби мовою цивільних компетенцій без знецінення.</p><span class="free">Безкоштовно →</span></button>
+      <button class="profile card" data-type="medical"><span class="profile-icon">＋</span><h2>Медичний працівник</h2><p>Структура для лікарів, медсестер, фельдшерів та інших фахівців.</p><span class="free">Безкоштовно →</span></button>
+    </section>
+    <section id="builder" class="resume-workspace">
+      <div class="resume-toolbar card">
+        <div><b id="builderTitle">Цивільне резюме</b><span>Усі підказки AI можна змінити вручну</span></div>
+        <div class="toolbar-groups">
+          <div class="segmented"><button data-mode="basic" class="active">Базовий</button><button data-mode="vacancy">Під вакансію</button></div>
+          <div class="segmented"><button data-template="standard">Стандартний</button><button data-template="stylish" class="active">Стильний</button></div>
+        </div>
+      </div>
+      <div class="enhanced-builder">
+        <div class="editor-stack">
+          <section class="panel card form-section">
+            <h2>Контактні дані</h2>
+            <div class="form">
+              <div class="field full"><label for="name">Ім’я та прізвище</label><input id="name" placeholder="Іван Іваненко"></div>
+              <div class="field full focus-field"><label for="role">Бажана посада — почніть звідси</label><input id="role" placeholder="Наприклад: адміністратор, HR-менеджер, медична сестра"><small>Достатньо написати посаду — AI допоможе сформулювати решту.</small></div>
+              <div class="field"><label for="email">Email</label><input id="email" type="email"></div><div class="field"><label for="phone">Телефон</label><input id="phone"></div>
+              <div class="field"><label for="city">Місто</label><input id="city"></div><div class="field"><label for="linkedin">LinkedIn</label><input id="linkedin" placeholder="linkedin.com/in/..."></div>
+            </div>
+          </section>
+          <section class="panel card form-section photo-section">
+            <div class="section-title"><div><h2>Фото</h2><p class="small">Фото зберігається лише у вашому браузері.</p></div><button id="removePhoto" class="text-btn" hidden>Видалити</button></div>
+            <label class="resume-photo-upload"><input id="resumePhoto" type="file" accept="image/jpeg,image/png,image/webp"><span id="photoThumb" class="photo-thumb">＋</span><span><b id="photoLabel">Завантажити фото</b><small>JPG, PNG або WEBP · до 5 МБ</small></span></label>
+          </section>
+          <section class="panel card form-section">
+            <div class="section-title"><div><h2>Досвід роботи</h2><p class="small">Напишіть хоча б посаду — AI запропонує функціонал.</p></div><button id="addExperience" class="text-btn">＋ Додати</button></div><div id="experienceList"></div>
+          </section>
+          <section class="panel card form-section ai-section">
+            <div class="section-title"><div><h2>✦ AI-генерація</h2><p class="small">Пропозиція, а не остаточний текст.</p></div></div>
+            <div class="ai-block"><div class="ai-heading"><label for="summary">Про себе</label><button id="generateSummary" class="mini-ai">✦ Згенерувати</button></div><textarea id="summary" placeholder="AI запропонує 2–3 речення або напишіть самостійно"></textarea></div>
+            <div class="ai-block"><div class="ai-heading"><label for="skills">Навички</label><button id="generateSkills" class="mini-ai">✦ Згенерувати</button></div><textarea id="skills" placeholder="Кожна навичка з нового рядка"></textarea></div>
+          </section>
+          <section class="panel card form-section"><h2>Освіта</h2><div class="form"><div class="field full"><label for="education">Заклад, спеціальність, роки навчання</label><textarea id="education"></textarea></div></div></section>
+          <section id="vacancySection" class="panel card form-section vacancy-panel" hidden><h2>Адаптація під вакансію</h2><p class="small">Вставте текст вакансії — AI змінить акценти, але не вигадуватиме досвід.</p><div class="field"><textarea id="vacancy" rows="6" placeholder="Скопіюйте текст вакансії"></textarea></div><button id="adaptVacancy" class="btn">✦ Адаптувати резюме</button></section>
+          <div id="aiStatus" class="status" hidden></div>
+        </div>
+        <aside class="preview-column">
+          <div class="preview-actions"><button id="pdf" class="btn">Зберегти PDF</button><button id="doc" class="btn outline">Завантажити DOC</button><button id="clear" class="btn muted">Очистити</button></div>
+          <article id="paper" class="paper stylish">
+            <header class="resume-paper-head"><div id="pPhoto" class="paper-photo" hidden></div><div><h1 id="pName">Ваше ім’я</h1><div id="pRole" class="paper-role">Бажана посада</div><div id="pContact" class="paper-contact">email • телефон • місто</div></div></header>
+            <div class="paper-body"><section class="paper-section"><h3>Про себе</h3><div id="pSummary" class="empty">AI допоможе сформулювати цей розділ</div></section><section class="paper-section"><h3 id="pExperienceTitle">Досвід роботи</h3><div id="pExperience" class="empty">Додайте посаду або місце роботи</div></section><section class="paper-section"><h3>Освіта</h3><div id="pEducation" class="empty">Заповніть освіту</div></section><section class="paper-section"><h3>Навички</h3><div id="pSkills" class="empty">AI допоможе скласти перелік</div></section></div>
+          </article><p class="preview-help">Текст, запропонований AI, редагується у формі ліворуч.</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <div class="legal-links"><a href="/career/oferta">Публічна оферта</a><a href="/career/privacy">Конфіденційність</a><a href="https://forms.gle/Shp2k2sa2SBpRJQY7" target="_blank" rel="noopener">Зворотний зв’язок</a></div>
+  <script src="/assets/resume.js" defer></script>
+</body>
+</html>
