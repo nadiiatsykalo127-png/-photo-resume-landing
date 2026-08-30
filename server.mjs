@@ -8,6 +8,7 @@ import path from "node:path";
 import {fileURLToPath} from "node:url";
 import fs from "node:fs/promises";
 import {GoogleGenAI} from "@google/genai";
+import {buildDocx,buildPdf} from "./resume-export.mjs";
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 const app=express();
@@ -23,7 +24,7 @@ async function saveJob(id,job){await fs.writeFile(metaPath(id),JSON.stringify(jo
 
 app.set("trust proxy",1);
 app.use(helmet({contentSecurityPolicy:false,crossOriginResourcePolicy:false}));
-app.use(express.json({limit:"1mb",verify:(req,_res,buf)=>{req.rawBody=Buffer.from(buf)}}));
+app.use(express.json({limit:"8mb",verify:(req,_res,buf)=>{req.rawBody=Buffer.from(buf)}}));
 app.use("/api",rateLimit({windowMs:60_000,limit:30,standardHeaders:true,legacyHeaders:false}));
 app.use("/assets",express.static(path.join(root,"public/assets"),{maxAge:"1d"}));
 for(const image of ["before.jpg","after1.jpg","after2.jpg","after3.jpg","veteran-handshake.jpg"]){app.get(`/${image}`,(_req,res)=>res.sendFile(path.join(root,image)))}
@@ -83,12 +84,12 @@ app.post("/api/resume/assist",async(req,res,next)=>{try{
   if(!process.env.GEMINI_API_KEY)return res.status(503).json({error:"AI-підказки будуть доступні після підключення ключа."});
   const {profile="civilian",action="summary",data={},vacancy="",experience={}}=req.body||{};
   const clip=(value,max=4000)=>String(value??"").slice(0,max);
-  const facts={role:clip(data.role,150),summary:clip(data.summary,1500),skills:clip(data.skills,1500),education:clip(data.education,1500),experience:(Array.isArray(data.experience)?data.experience:[]).slice(0,10).map(item=>({kind:clip(item.kind,30),position:clip(item.position,150),company:clip(item.company,150),city:clip(item.city,100),start:clip(item.start,50),end:clip(item.end,50),duties:clip(item.duties,1500)}))};
+  const facts={role:clip(data.role,150),summary:clip(data.summary,1500),skills:clip(data.skills,1500),education:clip(data.education,1500),experience:(Array.isArray(data.experience)?data.experience:[]).slice(0,10).map(item=>({id:clip(item.id,80),kind:clip(item.kind,30),position:clip(item.position,150),company:clip(item.company,150),city:clip(item.city,100),start:clip(item.start,50),end:clip(item.end,50),duties:clip(item.duties,1500)}))};
   const selected={kind:clip(experience.kind,30),position:clip(experience.position,150),company:clip(experience.company,150),duties:clip(experience.duties,1500)};
-  const formats={summary:'{"summary":"2–4 concise sentences"}',skills:'{"hardSkills":["..."],"softSkills":["..."]}',functions:'{"functions":["5–7 concise responsibility or achievement statements"]}',adapt:'{"summary":"adapted summary","skills":["6–10 relevant skills"]}'};
+  const formats={summary:'{"summary":"2–4 concise first-person sentences"}',skills:'{"hardSkills":["..."],"softSkills":["..."]}',functions:'{"functions":["5–7 concise responsibility or achievement statements"]}',adapt:'{"summary":"adapted first-person summary","skills":["6–9 relevant skills"],"experience":[{"id":"original experience id","functions":["3–6 vacancy-relevant statements"]}]}',proofread:'{"role":"corrected desired role","summary":"corrected first-person summary","skills":"corrected skills text","education":"corrected education text","experience":[{"id":"original experience id","position":"corrected position title","duties":"corrected duties preserving line breaks"}]}'};
   if(!formats[action])return res.status(400).json({error:"Невідома дія AI."});
-  const instructions={summary:"Write a concise professional About Me section based only on supplied facts and desired role.",skills:"Suggest relevant hard and soft skills. Do not claim certifications, tools or abilities unsupported by the facts; generic role-relevant suggestions are allowed and must be easy to edit.",functions:"Suggest typical, truthful-sounding responsibility formulations for the supplied position. Phrase them as editable suggestions; do not invent numbers, employers, awards, ranks or operations.",adapt:"Adapt emphasis to the vacancy using only supplied facts. Do not invent experience or qualifications."};
-  const prompt=`You are a careful Ukrainian career editor. Respond in Ukrainian and return ONLY valid JSON in this exact shape: ${formats[action]}. ${instructions[action]} The user will review and edit every suggestion. Profile: ${clip(profile,40)}. Candidate facts: ${JSON.stringify(facts)}. Selected experience: ${JSON.stringify(selected)}. Vacancy: ${clip(vacancy,6000)||"not supplied"}. For military experience, respectfully translate duties into civilian competencies without disclosing sensitive details. For medical experience, preserve accurate terminology.`;
+  const instructions={summary:"Write a concise professional About Me section in the candidate's first person based only on supplied facts and desired role.",skills:"Suggest only 6–9 genuinely relevant skills. Avoid a generic pile of clichés. Do not claim certifications, tools or abilities unsupported by the facts.",functions:"Suggest typical, truthful responsibility formulations for the supplied position. Phrase them as editable suggestions; do not invent numbers, employers, awards, ranks or operations.",adapt:"Adapt the whole resume to the vacancy: summary, skills, and duties for every experience item. Keep company, role and dates unchanged. Reorder, omit or rephrase duties to emphasize relevant facts, but never invent experience, achievements, numbers or tools. Return every experience item using its original id.",proofread:"Proofread the supplied Ukrainian resume. Correct spelling, punctuation, grammar, word agreement and obvious typing errors only. Preserve every fact, number, proper name, employer, role, date and the meaning. Do not add, remove, embellish or adapt content. Keep the summary in the first person and preserve duty line breaks and bullet structure. Return every experience item using its original id."};
+  const prompt=`You are a careful Ukrainian career editor. Respond in grammatically correct Ukrainian and return ONLY valid JSON in this exact shape: ${formats[action]}. ${instructions[action]} Write the About Me section strictly in first person (for example: "організовую", "володію", "дотримуюся"), never as an outside description ("організовує", "володіє"). Proofread grammar before answering. The user will review and edit every suggestion. Profile: ${clip(profile,40)}. Candidate facts: ${JSON.stringify(facts)}. Selected experience: ${JSON.stringify(selected)}. Vacancy: ${clip(vacancy,6000)||"not supplied"}. For military experience, use the Ukrainian veteran-employment principle of translating actual functions into understandable civilian competencies. Treat the military title only as a clue, rely on the user's stated facts, do not disclose unit numbers, locations, operations, weapons details or other sensitive information. For medical experience, preserve accurate terminology and never invent procedures or certifications.`;
   const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
   const models=[process.env.GEMINI_TEXT_MODEL,"gemini-3.7-flash","gemini-3.6-flash","gemini-2.5-flash"].filter((model,index,list)=>model&&list.indexOf(model)===index);
   let result,lastError;
@@ -110,6 +111,16 @@ app.post("/api/resume/assist",async(req,res,next)=>{try{
   const raw=String(result.text||"").replace(/^```json\s*/i,"").replace(/\s*```$/,"");
   let parsed;try{parsed=JSON.parse(raw)}catch{return res.status(502).json({error:"AI повернув незрозумілу відповідь. Спробуйте ще раз."})}
   res.json(parsed);
+}catch(error){next(error)}});
+
+app.post("/api/resume/pdf",async(req,res,next)=>{try{
+  const buffer=await buildPdf(req.body||{});
+  res.set({"Content-Type":"application/pdf","Content-Disposition":'attachment; filename="nadinartdigital.com.ua.pdf"',"Cache-Control":"no-store"}).send(buffer);
+}catch(error){next(error)}});
+
+app.post("/api/resume/docx",async(req,res,next)=>{try{
+  const buffer=await buildDocx(req.body||{});
+  res.set({"Content-Type":"application/vnd.openxmlformats-officedocument.wordprocessingml.document","Content-Disposition":'attachment; filename="nadinartdigital.com.ua.docx"',"Cache-Control":"no-store"}).send(buffer);
 }catch(error){next(error)}});
 
 setInterval(async()=>{const cutoff=Date.now()-24*60*60*1000;for(const file of (await fs.readdir(dataDir)).filter(name=>name.endsWith(".json"))){const id=file.slice(0,-5),job=await getJob(id);if(job?.createdAt<cutoff){await Promise.allSettled([0,1,2].map(index=>fs.unlink(imagePath(id,index))));await fs.unlink(metaPath(id)).catch(()=>{})}}},60*60*1000).unref();

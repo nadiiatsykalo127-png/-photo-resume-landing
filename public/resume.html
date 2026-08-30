@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/app.css?v=20260818-2">
+  <link rel="stylesheet" href="/assets/app.css?v=20260830-2">
 </head>
 <body>
   <header class="top"><div class="wrap"><a class="brand" href="/career">AI для кар’єри</a><a class="back" href="/career">← На головну</a></div></header>
@@ -47,16 +47,16 @@
           <section class="panel card form-section ai-section">
             <div class="section-title"><div><h2>✦ AI-генерація</h2><p class="small">Пропозиція, а не остаточний текст.</p></div></div>
             <div class="ai-block"><div class="ai-heading"><label for="summary">Про себе</label><button id="generateSummary" class="mini-ai">✦ Згенерувати</button></div><textarea id="summary" placeholder="AI запропонує 2–3 речення або напишіть самостійно"></textarea></div>
-            <div class="ai-block"><div class="ai-heading"><label for="skills">Навички</label><button id="generateSkills" class="mini-ai">✦ Згенерувати</button></div><textarea id="skills" placeholder="Кожна навичка з нового рядка"></textarea></div>
+            <div class="ai-block"><div class="ai-heading"><label for="skills">Навички</label><button id="generateSkills" class="mini-ai">✦ Згенерувати</button></div><textarea id="skills" placeholder="Кожна навичка з нового рядка"></textarea><p class="small">У готовому резюме навички будуть оформлені природним реченням через кому.</p></div>
           </section>
           <section class="panel card form-section"><h2>Освіта</h2><div class="form"><div class="field full"><label for="education">Заклад, спеціальність, роки навчання</label><textarea id="education"></textarea></div></div></section>
-          <section id="vacancySection" class="panel card form-section vacancy-panel" hidden><h2>Адаптація під вакансію</h2><p class="small">Вставте текст вакансії — AI змінить акценти, але не вигадуватиме досвід.</p><div class="field"><textarea id="vacancy" rows="6" placeholder="Скопіюйте текст вакансії"></textarea></div><button id="adaptVacancy" class="btn">✦ Адаптувати резюме</button></section>
+          <section id="vacancySection" class="panel card form-section vacancy-panel" hidden><h2>Адаптація під вакансію</h2><p class="small">Почніть із тексту вакансії. Вкажіть достовірні посади, місця роботи, дати та освіту — обов’язки й навички можна не заповнювати. AI заповнить усі текстові розділи разом, а ви перевірите й відредагуєте результат.</p><div class="field"><textarea id="vacancy" rows="6" placeholder="Скопіюйте текст вакансії"></textarea></div><button id="adaptVacancy" class="btn">✦ Заповнити резюме під вакансію</button></section>
           <div id="aiStatus" class="status" hidden></div>
         </div>
         <aside class="preview-column">
-          <div class="preview-actions"><button id="pdf" class="btn">Зберегти PDF</button><button id="doc" class="btn outline">Завантажити DOC</button><button id="clear" class="btn muted">Очистити</button></div>
+          <div class="preview-actions"><button id="proofread" class="btn outline">✦ Перевірити орфографію</button><button id="pdf" class="btn">Зберегти PDF</button><button id="doc" class="btn outline">Завантажити DOCX</button><button id="clear" class="btn muted">Очистити</button></div>
           <article id="paper" class="paper stylish">
-            <header class="resume-paper-head"><div id="pPhoto" class="paper-photo" hidden></div><div><h1 id="pName">Ваше ім’я</h1><div id="pRole" class="paper-role">Бажана посада</div><div id="pContact" class="paper-contact">email • телефон • місто</div></div></header>
+            <header class="resume-paper-head"><div id="pPhoto" class="paper-photo" hidden><img id="pPhotoImage" alt="Фото кандидата"></div><div><h1 id="pName">Ваше ім’я</h1><div id="pRole" class="paper-role">Мета: бажана посада</div><div id="pContact" class="paper-contact">email • телефон • місто</div></div></header>
             <div class="paper-body"><section class="paper-section"><h3>Про себе</h3><div id="pSummary" class="empty">AI допоможе сформулювати цей розділ</div></section><section class="paper-section"><h3 id="pExperienceTitle">Досвід роботи</h3><div id="pExperience" class="empty">Додайте посаду або місце роботи</div></section><section class="paper-section"><h3>Освіта</h3><div id="pEducation" class="empty">Заповніть освіту</div></section><section class="paper-section"><h3>Навички</h3><div id="pSkills" class="empty">AI допоможе скласти перелік</div></section></div>
           </article><p class="preview-help">Текст, запропонований AI, редагується у формі ліворуч.</p>
         </aside>
@@ -64,6 +64,6 @@
     </section>
   </main>
   <div class="legal-links"><a href="/career/oferta">Публічна оферта</a><a href="/career/privacy">Конфіденційність</a><a href="https://forms.gle/Shp2k2sa2SBpRJQY7" target="_blank" rel="noopener">Зворотний зв’язок</a></div>
-  <script src="/assets/resume.js?v=20260818-2" defer></script>
+  <script src="/assets/resume.js?v=20260830-2" defer></script>
 </body>
 </html>
