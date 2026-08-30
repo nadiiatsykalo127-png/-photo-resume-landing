@@ -90,7 +90,23 @@ app.post("/api/resume/assist",async(req,res,next)=>{try{
   const instructions={summary:"Write a concise professional About Me section based only on supplied facts and desired role.",skills:"Suggest relevant hard and soft skills. Do not claim certifications, tools or abilities unsupported by the facts; generic role-relevant suggestions are allowed and must be easy to edit.",functions:"Suggest typical, truthful-sounding responsibility formulations for the supplied position. Phrase them as editable suggestions; do not invent numbers, employers, awards, ranks or operations.",adapt:"Adapt emphasis to the vacancy using only supplied facts. Do not invent experience or qualifications."};
   const prompt=`You are a careful Ukrainian career editor. Respond in Ukrainian and return ONLY valid JSON in this exact shape: ${formats[action]}. ${instructions[action]} The user will review and edit every suggestion. Profile: ${clip(profile,40)}. Candidate facts: ${JSON.stringify(facts)}. Selected experience: ${JSON.stringify(selected)}. Vacancy: ${clip(vacancy,6000)||"not supplied"}. For military experience, respectfully translate duties into civilian competencies without disclosing sensitive details. For medical experience, preserve accurate terminology.`;
   const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
-  const result=await ai.models.generateContent({model:process.env.GEMINI_TEXT_MODEL||"gemini-3.7-flash",contents:prompt,config:{responseMimeType:"application/json"}});
+  const models=[process.env.GEMINI_TEXT_MODEL,"gemini-3.7-flash","gemini-3.6-flash","gemini-2.5-flash"].filter((model,index,list)=>model&&list.indexOf(model)===index);
+  let result,lastError;
+  for(const model of models){
+    try{
+      result=await ai.models.generateContent({model,contents:prompt,config:{responseMimeType:"application/json"}});
+      break;
+    }catch(error){
+      lastError=error;
+      const status=Number(error?.status||error?.error?.code||0);
+      if(![429,500,503].includes(status))throw error;
+      console.warn(`Resume AI model ${model} unavailable (${status}); trying fallback.`);
+    }
+  }
+  if(!result){
+    console.error(lastError);
+    return res.status(503).json({error:"AI зараз перевантажений. Будь ласка, спробуйте ще раз за кілька хвилин."});
+  }
   const raw=String(result.text||"").replace(/^```json\s*/i,"").replace(/\s*```$/,"");
   let parsed;try{parsed=JSON.parse(raw)}catch{return res.status(502).json({error:"AI повернув незрозумілу відповідь. Спробуйте ще раз."})}
   res.json(parsed);
