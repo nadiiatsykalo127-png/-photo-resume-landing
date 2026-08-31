@@ -45,10 +45,9 @@ function photoBuffer(dataUri){
   const match=/^data:image\/(?:png|jpe?g|webp);base64,(.+)$/i.exec(dataUri||"");
   return match?Buffer.from(match[1],"base64"):null;
 }
-async function roundPhoto(dataUri,size=300){
+async function resumePhoto(dataUri,width=300,height=400){
   const input=photoBuffer(dataUri);if(!input)return null;
-  const mask=Buffer.from(`<svg width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="white"/></svg>`);
-  return sharp(input).rotate().resize(size,size,{fit:"cover",position:"attention"}).composite([{input:mask,blend:"dest-in"}]).png().toBuffer();
+  return sharp(input).rotate().resize(width,height,{fit:"contain",background:{r:255,g:255,b:255,alpha:0}}).png().toBuffer();
 }
 
 const docRun=(text,options={})=>new TextRun({text,font:"Arial",color:options.color||DARK,size:options.size||20,bold:Boolean(options.bold),italics:Boolean(options.italics)});
@@ -57,13 +56,13 @@ function docHeading(text){return new Paragraph({children:[docRun(text.toLocaleUp
 function docBody(text,options={}){return new Paragraph({children:[docRun(text,{size:20,bold:options.bold,color:options.color||DARK})],spacing:{before:options.before??0,after:options.after??80,line:290},keepNext:Boolean(options.keepNext)});}
 
 export async function buildDocx(raw){
-  const data=normalize(raw),photo=await roundPhoto(data.photo,320),stylish=data.template==="stylish";
+  const data=normalize(raw),photo=await resumePhoto(data.photo,300,400),stylish=data.template==="stylish";
   const headerText=[];
   headerText.push(new Paragraph({children:[docRun(data.name||"Резюме",{size:34,bold:true,color:stylish?WHITE:DARK})],spacing:{after:80},keepNext:true}));
   if(data.role)headerText.push(new Paragraph({children:[docRun(`Мета: ${data.role}`,{size:22,bold:true,color:stylish?"EAF3FF":BLUE})],spacing:{after:80},keepNext:true}));
   const contact=contactLine(data);if(contact)headerText.push(new Paragraph({children:[docRun(contact,{size:17,color:stylish?WHITE:MUTED})],spacing:{after:0}}));
   const cells=[];
-  if(photo)cells.push(new TableCell({width:{size:1450,type:WidthType.DXA},verticalAlign:VerticalAlign.CENTER,borders:emptyBorders,shading:stylish?{fill:"246B96",type:ShadingType.CLEAR}:undefined,margins:{top:180,bottom:180,left:180,right:140},children:[new Paragraph({alignment:AlignmentType.CENTER,children:[new ImageRun({data:photo,transformation:{width:82,height:82},type:"png"})]})]}));
+  if(photo)cells.push(new TableCell({width:{size:1450,type:WidthType.DXA},verticalAlign:VerticalAlign.CENTER,borders:emptyBorders,shading:stylish?{fill:"246B96",type:ShadingType.CLEAR}:undefined,margins:{top:180,bottom:180,left:180,right:140},children:[new Paragraph({alignment:AlignmentType.CENTER,children:[new ImageRun({data:photo,transformation:{width:70,height:93},type:"png"})]})]}));
   cells.push(new TableCell({width:{size:photo?7550:9000,type:WidthType.DXA},verticalAlign:VerticalAlign.CENTER,borders:emptyBorders,shading:stylish?{fill:"246B96",type:ShadingType.CLEAR}:undefined,margins:{top:220,bottom:220,left:photo?120:240,right:240},children:headerText}));
   const children=[new Table({width:{size:9000,type:WidthType.DXA},columnWidths:photo?[1450,7550]:[9000],borders:emptyBorders,rows:[new TableRow({children:cells,cantSplit:true})]})];
   if(data.summary){children.push(docHeading("Про себе"),docBody(data.summary));}
@@ -95,7 +94,7 @@ function pdfSection(doc,title){if(doc.y>doc.page.height-120)doc.addPage();doc.mo
 function ensurePdf(doc,height){if(doc.y+height>doc.page.height-doc.page.margins.bottom-18)doc.addPage();}
 
 export async function buildPdf(raw){
-  const data=normalize(raw),photo=await roundPhoto(data.photo,360),stylish=data.template==="stylish";
+  const data=normalize(raw),photo=await resumePhoto(data.photo,300,400),stylish=data.template==="stylish";
   const regular=findFont("regular"),bold=findFont("bold");if(!regular||!bold)throw new Error("PDF fonts are unavailable");
   const doc=new PDFDocument({size:"A4",margins:{top:42,right:48,bottom:42,left:48},info:{Title:"Резюме",Author:"nadinartdigital.com.ua"}});
   doc.registerFont("Resume",regular).registerFont("ResumeBold",bold);
@@ -104,7 +103,7 @@ export async function buildPdf(raw){
   const headerY=doc.y,headerH=photo?132:112;
   if(stylish)doc.save().fillColor("#246B96").rect(left,headerY,width,headerH).fill().restore();
   let textX=left+(photo?112:24),textY=headerY+23;
-  if(photo){doc.save().circle(left+63,headerY+headerH/2,38).clip().image(photo,left+25,headerY+headerH/2-38,{width:76,height:76}).restore();}
+  if(photo){doc.save().roundedRect(left+28,headerY+17,70,98,5).clip().image(photo,left+28,headerY+17,{width:70,height:98}).restore();}
   doc.font("ResumeBold").fontSize(23).fillColor(stylish?"#FFFFFF":`#${DARK}`).text(data.name||"Резюме",textX,textY,{width:width-(textX-left)-22});
   let y=doc.y+4;if(data.role){doc.font("ResumeBold").fontSize(11.5).fillColor(stylish?"#EAF3FF":`#${BLUE}`).text(`Мета: ${data.role}`,textX,y,{width:width-(textX-left)-22});y=doc.y+6;}
   const contact=contactLine(data);if(contact)doc.font("Resume").fontSize(8.2).fillColor(stylish?"#FFFFFF":`#${MUTED}`).text(contact,textX,y,{width:width-(textX-left)-22,lineGap:1});
