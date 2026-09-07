@@ -25,3 +25,7 @@ services:
         sync: false
       - key: MONO_X_TOKEN
         sync: false
+      - key: MONO_TEST_TOKEN
+        sync: false
+      - key: MONO_PAYMENT_MODE
+        value: live
