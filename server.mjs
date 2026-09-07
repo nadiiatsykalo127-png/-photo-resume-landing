@@ -15,6 +15,8 @@ const app=express();
 const port=Number(process.env.PORT||10000);
 const baseUrl=(process.env.PUBLIC_BASE_URL||"http://localhost:10000").replace(/\/$/,"");
 const dataDir=process.env.DATA_DIR||path.join(root,"data/private");
+const monoPaymentMode=String(process.env.MONO_PAYMENT_MODE||"live").toLowerCase();
+const getMonoToken=()=>monoPaymentMode==="test"?process.env.MONO_TEST_TOKEN:process.env.MONO_X_TOKEN;
 const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:10*1024*1024},fileFilter:(_req,file,cb)=>cb(null,["image/jpeg","image/png","image/webp"].includes(file.mimetype))});
 await fs.mkdir(dataDir,{recursive:true});
 const metaPath=id=>path.join(dataDir,`${id}.json`);
@@ -66,16 +68,17 @@ app.post("/api/payment/create",async(req,res,next)=>{
   if(!job||!Number.isInteger(index)||index<0||index>2)return res.status(404).json({error:"Результат не знайдено або термін зберігання минув."});
   if(job.paid)return res.json({paid:true,downloadUrl:`/api/photo/download/${jobId}`});
   if(job.invoiceId)return res.status(409).json({error:"Рахунок уже створено. Завершіть оплату у відкритому вікні або дочекайтеся оновлення статусу."});
-  if(!process.env.MONO_X_TOKEN)return res.status(503).json({error:"Автоматична оплата буде доступна після активації Monobank API."});
+  const monoToken=getMonoToken();
+  if(!monoToken)return res.status(503).json({error:monoPaymentMode==="test"?"Тестовий токен Monobank не налаштований.":"Автоматична оплата буде доступна після активації Monobank API."});
   job.selected=index;
   const reference=`photo:${jobId}`;
-  const mono=await fetch("https://api.monobank.ua/api/merchant/invoice/create",{method:"POST",headers:{"content-type":"application/json","X-Token":process.env.MONO_X_TOKEN},body:JSON.stringify({amount:4900,ccy:980,merchantPaymInfo:{reference,destination:"Фото для резюме без водяного знака",basketOrder:[{name:"Фото для резюме",qty:1,sum:4900,unit:"шт.",code:"career-photo"}]},redirectUrl:`${baseUrl}/career/photo?order=${jobId}`,webHookUrl:`${baseUrl}/api/payment/webhook`})});
+  const mono=await fetch("https://api.monobank.ua/api/merchant/invoice/create",{method:"POST",headers:{"content-type":"application/json","X-Token":monoToken},body:JSON.stringify({amount:4900,ccy:980,merchantPaymInfo:{reference,destination:"Фото для резюме без водяного знака",basketOrder:[{name:"Фото для резюме",qty:1,sum:4900,unit:"шт.",code:"career-photo"}]},redirectUrl:`${baseUrl}/career/photo?order=${jobId}`,webHookUrl:`${baseUrl}/api/payment/webhook`})});
   const body=await mono.json();if(!mono.ok)throw new Error(body.errText||"Monobank не створив рахунок");job.invoiceId=body.invoiceId;await saveJob(jobId,job);res.json({pageUrl:body.pageUrl});
  }catch(error){next(error)}
 });
 
 let monoPublicKey=null;
-async function getMonoPublicKey(){if(monoPublicKey)return monoPublicKey;const response=await fetch("https://api.monobank.ua/api/merchant/pubkey",{headers:{"X-Token":process.env.MONO_X_TOKEN}});if(!response.ok)throw new Error("Не вдалося отримати ключ Monobank");const {key}=await response.json();monoPublicKey=Buffer.from(key,"base64").toString("utf8");return monoPublicKey}
+async function getMonoPublicKey(){if(monoPublicKey)return monoPublicKey;const monoToken=getMonoToken();if(!monoToken)throw new Error("Monobank token is not configured");const response=await fetch("https://api.monobank.ua/api/merchant/pubkey",{headers:{"X-Token":monoToken}});if(!response.ok)throw new Error("Не вдалося отримати ключ Monobank");const {key}=await response.json();monoPublicKey=Buffer.from(key,"base64").toString("utf8");return monoPublicKey}
 app.post("/api/payment/webhook",async(req,res,next)=>{try{const signature=req.get("X-Sign");if(!signature||!req.rawBody)return res.sendStatus(401);const publicKey=await getMonoPublicKey();const valid=crypto.verify("sha256",req.rawBody,publicKey,Buffer.from(signature,"base64"));if(!valid)return res.sendStatus(401);const {invoiceId,status}=req.body||{};if(status==="success"){const files=await fs.readdir(dataDir);for(const file of files.filter(name=>name.endsWith(".json"))){const id=file.slice(0,-5),job=await getJob(id);if(job?.invoiceId===invoiceId){job.paid=true;await saveJob(id,job);break}}}res.sendStatus(200)}catch(error){next(error)}});
 app.get("/api/payment/status/:jobId",async(req,res)=>{const job=await getJob(req.params.jobId);res.json({paid:Boolean(job?.paid),downloadUrl:job?.paid?`/api/photo/download/${req.params.jobId}`:null})});
 app.get("/api/photo/download/:jobId",async(req,res,next)=>{try{const job=await getJob(req.params.jobId);if(!job?.paid||job.selected===null)return res.sendStatus(403);const file=imagePath(req.params.jobId,job.selected);res.download(file,"resume-photo.jpg",async error=>{if(!error){await Promise.allSettled([0,1,2].map(index=>fs.unlink(imagePath(req.params.jobId,index))));await fs.unlink(metaPath(req.params.jobId)).catch(()=>{})}else next(error)})}catch(error){next(error)}});
