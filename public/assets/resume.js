@@ -8,6 +8,7 @@ const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt
 const cleanItem=value=>String(value||"").trim().replace(/^\s*[•●▪◦-]\s*/,"").trim();
 const lines=value=>String(value||"").split(/\n|,/).map(cleanItem).filter(Boolean);
 const lowerInitial=value=>{const text=String(value||"");if(text.length>3&&text===text.toLocaleUpperCase("uk-UA"))return text.toLocaleLowerCase("uk-UA");return text?text[0].toLocaleLowerCase("uk-UA")+text.slice(1):text};
+const normalizeCity=value=>String(value||"").replace(/\bДнепр\b/giu,match=>match===match.toLocaleUpperCase("uk-UA")?"ДНІПРО":match[0]===match[0].toLocaleUpperCase("uk-UA")?"Дніпро":"дніпро");
 function naturalSkills(value){const items=lines(value);if(!items.length)return"";return items.map((item,index)=>index?lowerInitial(item):item[0].toLocaleUpperCase("uk-UA")+item.slice(1)).join(", ").replace(/[.;,\s]+$/,"")+"."}
 function save(){try{localStorage.setItem("careerResumeDraftV2",JSON.stringify({...state,photo:""}))}catch{}renderPreview()}
 function bindField(id,key){$(id).value=state[key]||"";$(id).addEventListener("input",e=>{state[key]=e.target.value;save()})}
@@ -73,7 +74,7 @@ async function askAI(action,extra={},button){
   if(action==="proofread"&&![state.role,state.city,state.summary,state.skills,state.education,...state.experience.flatMap(x=>[x.position,x.duties])].some(value=>String(value||"").trim()))throw new Error("Спочатку заповніть хоча б один текстовий розділ.");
   if(action==="adapt"&&!state.vacancy.trim())throw new Error("Спочатку вставте текст вакансії.");
   const old=button?.textContent;if(button){button.disabled=true;button.textContent="Зачекайте…"}showStatus("AI готує варіант. Ви зможете його відредагувати.");
-  try{const payload={profile:state.profile,action,data:{role:state.role,summary:state.summary,skills:state.skills,education:state.education,experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
+  try{const payload={profile:state.profile,action,data:{role:state.role,city:state.city,summary:state.summary,skills:state.skills,education:state.education,experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
 async function run(action,button,apply){try{apply(await askAI(action,{},button));save()}catch(error){showStatus(error.message,true)}}
 $("generateSummary").addEventListener("click",()=>run("summary",$("generateSummary"),result=>{$("summary").value=state.summary=result.summary||""}));
 $("generateSkills").addEventListener("click",()=>run("skills",$("generateSkills"),result=>{$("skills").value=state.skills=[...(result.hardSkills||[]),...(result.softSkills||[])].join("\n")}));
@@ -86,11 +87,11 @@ $("adaptVacancy").addEventListener("click",()=>run("adapt",$("adaptVacancy"),res
 
 $("proofread").addEventListener("click",()=>run("proofread",$("proofread"),result=>{
   if(typeof result.role==="string")$("role").value=state.role=result.role;
-  if(typeof result.city==="string")$("city").value=state.city=result.city;
+  $("city").value=state.city=normalizeCity(typeof result.city==="string"?result.city:state.city);
   if(typeof result.summary==="string")$("summary").value=state.summary=result.summary;
   if(typeof result.skills==="string")$("skills").value=state.skills=result.skills;
   if(typeof result.education==="string")$("education").value=state.education=result.education;
-  if(Array.isArray(result.experience)){for(const corrected of result.experience){const item=state.experience.find(x=>x.id===corrected.id);if(!item)continue;if(typeof corrected.position==="string")item.position=corrected.position;if(typeof corrected.duties==="string")item.duties=corrected.duties}renderExperiences()}
+  if(Array.isArray(result.experience)){for(const corrected of result.experience){const item=state.experience.find(x=>x.id===corrected.id);if(!item)continue;if(typeof corrected.position==="string")item.position=corrected.position;if(typeof corrected.city==="string")item.city=corrected.city;if(typeof corrected.duties==="string")item.duties=corrected.duties;item.city=normalizeCity(item.city)}renderExperiences()}
   showStatus("Орфографію перевірено. Перегляньте виправлення перед завантаженням.");
 }));
 
