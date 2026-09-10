@@ -59,7 +59,7 @@ export async function buildDocx(raw){
   const data=normalize(raw),photo=await resumePhoto(data.photo,300,400),stylish=data.template==="stylish";
   const headerText=[];
   headerText.push(new Paragraph({children:[docRun(data.name||"Резюме",{size:34,bold:true,color:stylish?WHITE:DARK})],spacing:{after:80},keepNext:true}));
-  if(data.role)headerText.push(new Paragraph({children:[docRun(`Мета: ${data.role}`,{size:22,bold:true,color:stylish?"EAF3FF":BLUE})],spacing:{after:80},keepNext:true}));
+  if(data.role)headerText.push(new Paragraph({children:[docRun(data.role,{size:22,bold:true,color:stylish?"EAF3FF":BLUE})],spacing:{after:80},keepNext:true}));
   const contact=contactLine(data);if(contact)headerText.push(new Paragraph({children:[docRun(contact,{size:17,color:stylish?WHITE:MUTED})],spacing:{after:0}}));
   const cells=[];
   if(photo)cells.push(new TableCell({width:{size:1450,type:WidthType.DXA},verticalAlign:VerticalAlign.CENTER,borders:emptyBorders,shading:stylish?{fill:"246B96",type:ShadingType.CLEAR}:undefined,margins:{top:180,bottom:180,left:180,right:140},children:[new Paragraph({alignment:AlignmentType.CENTER,children:[new ImageRun({data:photo,transformation:{width:70,height:93},type:"png"})]})]}));
@@ -72,6 +72,7 @@ export async function buildDocx(raw){
       children.push(docBody(item.position||"Досвід",{bold:true,before:90,after:30,keepNext:true}));
       const place=[item.company,item.city].filter(Boolean).join(", ");if(place)children.push(docBody(place,{color:MUTED,after:20,keepNext:true}));
       const dates=[item.start,item.end].filter(Boolean).join(" — ");if(dates)children.push(docBody(dates,{color:MUTED,after:45,keepNext:Boolean(item.duties.length)}));
+      if(item.duties.length)children.push(docBody("Обов’язки та досягнення:",{bold:true,before:30,after:35,keepNext:true}));
       for(const duty of item.duties)children.push(new Paragraph({text:duty,numbering:{reference:"resume-bullets",level:0},spacing:{after:45,line:280},widowControl:true}));
       children.push(new Paragraph({children:[docRun("")],spacing:{after:40,line:120}}));
     }
@@ -105,7 +106,7 @@ export async function buildPdf(raw){
   let textX=left+(photo?112:24),textY=headerY+23;
   if(photo){doc.save().roundedRect(left+28,headerY+17,70,98,5).clip().image(photo,left+28,headerY+17,{width:70,height:98}).restore();}
   doc.font("ResumeBold").fontSize(23).fillColor(stylish?"#FFFFFF":`#${DARK}`).text(data.name||"Резюме",textX,textY,{width:width-(textX-left)-22});
-  let y=doc.y+4;if(data.role){doc.font("ResumeBold").fontSize(11.5).fillColor(stylish?"#EAF3FF":`#${BLUE}`).text(`Мета: ${data.role}`,textX,y,{width:width-(textX-left)-22});y=doc.y+6;}
+  let y=doc.y+4;if(data.role){doc.font("ResumeBold").fontSize(11.5).fillColor(stylish?"#EAF3FF":`#${BLUE}`).text(data.role,textX,y,{width:width-(textX-left)-22});y=doc.y+6;}
   const contact=contactLine(data);if(contact)doc.font("Resume").fontSize(8.2).fillColor(stylish?"#FFFFFF":`#${MUTED}`).text(contact,textX,y,{width:width-(textX-left)-22,lineGap:1});
   doc.y=headerY+headerH+(stylish?8:0);if(!stylish)doc.strokeColor(`#${BLUE}`).lineWidth(2.2).moveTo(left,doc.y).lineTo(left+width,doc.y).stroke();
   if(data.summary){pdfSection(doc,"Про себе");doc.font("Resume").fontSize(9.4).fillColor(`#${DARK}`).text(data.summary,{width,lineGap:3});}
@@ -116,6 +117,7 @@ export async function buildPdf(raw){
       const place=[item.company,item.city].filter(Boolean).join(", ");if(place)doc.font("Resume").fontSize(8.7).fillColor(`#${MUTED}`).text(place,{width});
       const dates=[item.start,item.end].filter(Boolean).join(" — ");if(dates)doc.font("Resume").fontSize(8.2).fillColor("#8791A5").text(dates,{width});
       doc.moveDown(.25);
+      if(item.duties.length){ensurePdf(doc,24);doc.font("ResumeBold").fontSize(8.8).fillColor(`#${DARK}`).text("Обов’язки та досягнення:",{width});doc.moveDown(.15);}
       for(const duty of item.duties){const h=doc.heightOfString(duty,{width:width-16,lineGap:2})+4;ensurePdf(doc,h);const bulletY=doc.y;doc.font("Resume").fontSize(8.8).fillColor(`#${DARK}`).text("•",left,bulletY,{width:12,lineBreak:false});doc.text(duty,left+14,bulletY,{width:width-14,lineGap:2});doc.moveDown(.12);}
       doc.moveDown(.25);
     }
