@@ -45,7 +45,7 @@ app.post("/api/photo/generate",rateLimit({windowMs:10*60_000,limit:2,standardHea
   if(!process.env.GEMINI_API_KEY)return res.status(503).json({error:"Генерація буде доступна після підключення ключа AI."});
   const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
   const jobId=crypto.randomUUID();
-  const prompt="Create a realistic professional resume headshot from this exact person. Preserve identity, facial proportions, skin tone, expression and hair. Remove glasses, hats and distracting jewelry only when present. Light blue clean studio background, soft even lighting, white business shirt, centered head and shoulders, vertical 3:4 composition. Do not add text, logos or decorative elements.";
+  const prompt="Create a realistic professional resume headshot from this exact person. Preserve identity, facial proportions, skin tone, expression and hair. Remove glasses, hats and distracting jewelry only when present. Light blue clean studio background, soft even lighting, centered head and shoulders, vertical 3:4 composition. Dress the person in a plain white button-down business shirt only. No jacket, no blazer, no cardigan, no vest, no tie, and no dark outerwear. All three variations must use the same plain white shirt. Do not add text, logos or decorative elements.";
   const clean=[];
   for(let i=0;i<3;i++){
    const result=await ai.interactions.create({model:process.env.GEMINI_IMAGE_MODEL||"gemini-3.1-flash-image",input:[{type:"text",text:`${prompt} Create variation ${i+1} with subtly different professional lighting.`},{type:"image",mime_type:req.file.mimetype,data:req.file.buffer.toString("base64")}],response_format:{type:"image",mime_type:"image/jpeg",aspect_ratio:"3:4",image_size:"1K"}});
