@@ -24,18 +24,19 @@ const naturalSkills=value=>{
   return normalized.join(", ").replace(/[.;,\s]+$/,"")+".";
 };
 const duties=value=>clip(value).split("\n").map(cleanBullet).filter(Boolean);
+const normalizeCity=value=>clip(value,120).replace(/Днепр|Киев/giu,match=>({днепр:"Дніпро",киев:"Київ"}[match.toLocaleLowerCase("uk-UA")]||match));
 const contactLine=data=>[data.email,data.phone,data.city,data.linkedin].map(x=>clip(x,300)).filter(Boolean).join(" • ");
 
 function normalize(input={}){
   return {
     profile:clip(input.profile,40), template:input.template==="standard"?"standard":"stylish",
     name:clip(input.name,150), role:clip(input.role,180), email:clip(input.email,200),
-    phone:clip(input.phone,100), city:clip(input.city,120), linkedin:clip(input.linkedin,350),
+    phone:clip(input.phone,100), city:normalizeCity(input.city), linkedin:clip(input.linkedin,350),
     summary:clip(input.summary,3000), education:clip(input.education,3000),
     skills:naturalSkills(input.skills), photo:clip(input.photo,8_000_000),
     experience:(Array.isArray(input.experience)?input.experience:[]).slice(0,12).map(item=>({
       kind:item?.kind==="military"?"military":"civilian", position:clip(item?.position,180),
-      company:clip(item?.company,180), city:clip(item?.city,120), start:clip(item?.start,50),
+      company:clip(item?.company,180), city:normalizeCity(item?.city), start:clip(item?.start,50),
       end:clip(item?.end,50), duties:duties(item?.duties)
     })).filter(item=>item.position||item.company||item.duties.length)
   };
