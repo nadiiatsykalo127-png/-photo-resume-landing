@@ -8,7 +8,7 @@ const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt
 const cleanItem=value=>String(value||"").trim().replace(/^\s*[•●▪◦-]\s*/,"").trim();
 const lines=value=>String(value||"").split(/\n|,/).map(cleanItem).filter(Boolean);
 const lowerInitial=value=>{const text=String(value||"");if(text.length>3&&text===text.toLocaleUpperCase("uk-UA"))return text.toLocaleLowerCase("uk-UA");return text?text[0].toLocaleLowerCase("uk-UA")+text.slice(1):text};
-const normalizeCity=value=>String(value||"").replace(/\bДнепр\b/giu,match=>match===match.toLocaleUpperCase("uk-UA")?"ДНІПРО":match[0]===match[0].toLocaleUpperCase("uk-UA")?"Дніпро":"дніпро");
+const normalizeCity=value=>String(value||"").replace(/Днепр/giu,match=>match===match.toLocaleUpperCase("uk-UA")?"ДНІПРО":match[0]===match[0].toLocaleUpperCase("uk-UA")?"Дніпро":"дніпро");
 function naturalSkills(value){const items=lines(value);if(!items.length)return"";return items.map((item,index)=>index?lowerInitial(item):item[0].toLocaleUpperCase("uk-UA")+item.slice(1)).join(", ").replace(/[.;,\s]+$/,"")+"."}
 function save(){try{localStorage.setItem("careerResumeDraftV2",JSON.stringify({...state,photo:""}))}catch{}renderPreview()}
 function bindField(id,key){$(id).value=state[key]||"";$(id).addEventListener("input",e=>{state[key]=e.target.value;save()})}
