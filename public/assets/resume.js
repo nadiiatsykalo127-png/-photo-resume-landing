@@ -70,7 +70,7 @@ function previewText(id,value,placeholder){const el=$(id);el.className=value?"":
 function showStatus(message,error=false){const el=$("aiStatus");el.hidden=false;el.textContent=message;el.className=`status ${error?"error":""}`}
 async function askAI(action,extra={},button){
   if(action!=="proofread"&&!state.role)throw new Error("Спочатку вкажіть бажану посаду.");
-  if(action==="proofread"&&![state.role,state.summary,state.skills,state.education,...state.experience.flatMap(x=>[x.position,x.duties])].some(value=>String(value||"").trim()))throw new Error("Спочатку заповніть хоча б один текстовий розділ.");
+  if(action==="proofread"&&![state.role,state.city,state.summary,state.skills,state.education,...state.experience.flatMap(x=>[x.position,x.duties])].some(value=>String(value||"").trim()))throw new Error("Спочатку заповніть хоча б один текстовий розділ.");
   if(action==="adapt"&&!state.vacancy.trim())throw new Error("Спочатку вставте текст вакансії.");
   const old=button?.textContent;if(button){button.disabled=true;button.textContent="Зачекайте…"}showStatus("AI готує варіант. Ви зможете його відредагувати.");
   try{const payload={profile:state.profile,action,data:{role:state.role,summary:state.summary,skills:state.skills,education:state.education,experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
@@ -86,6 +86,7 @@ $("adaptVacancy").addEventListener("click",()=>run("adapt",$("adaptVacancy"),res
 
 $("proofread").addEventListener("click",()=>run("proofread",$("proofread"),result=>{
   if(typeof result.role==="string")$("role").value=state.role=result.role;
+  if(typeof result.city==="string")$("city").value=state.city=result.city;
   if(typeof result.summary==="string")$("summary").value=state.summary=result.summary;
   if(typeof result.skills==="string")$("skills").value=state.skills=result.skills;
   if(typeof result.education==="string")$("education").value=state.education=result.education;
