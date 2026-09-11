@@ -52,3 +52,17 @@
 .english-source-note{display:grid;gap:5px;margin:0 0 20px;padding:14px 16px;border-radius:12px;background:#e9efff;color:#31415d;line-height:1.5}
 .english-source-note span{font-size:13px}
 @media(max-width:700px){.document-switch{order:-1}.toolbar-groups{gap:8px}.resume-workspace.document-english .enhanced-builder{display:block}}
+
+
+/* English CV guided journey */
+.english-journey{display:grid;gap:18px;margin-bottom:24px;padding:22px;border:1px solid #c9d5ff;border-radius:16px;background:#f3f6ff}
+.english-journey h2{margin:0 0 6px}
+.english-journey p{margin:0;color:#58657f;line-height:1.55}
+.english-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0;padding:0;list-style:none}
+.english-steps li{display:flex;gap:11px;padding:14px;border-radius:12px;background:#fff;border:1px solid #dbe3f4}
+.english-steps li>span,.english-final-step>span{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:800}
+.english-steps li div,.english-final-step div{display:grid;gap:4px}
+.english-steps small,.english-final-step small{color:#69758d;line-height:1.45}
+.english-step-title{margin-top:4px}
+.english-final-step{display:flex;gap:12px;align-items:flex-start;margin:20px 0 14px;padding-top:18px;border-top:1px solid #dce3ef}
+@media(max-width:760px){.english-steps{grid-template-columns:1fr}.english-journey{padding:17px}}
