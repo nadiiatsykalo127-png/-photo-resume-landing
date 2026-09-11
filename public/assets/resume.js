@@ -1,9 +1,10 @@
 const $ = id => document.getElementById(id);
-const fresh = () => ({profile:"civilian",mode:"basic",template:"stylish",photo:"",name:"",englishName:"",role:"",email:"",phone:"",city:"",linkedin:"",summary:"",skills:"",education:"",vacancy:"",experience:[newExperience()]});
+const fresh = () => ({profile:"civilian",mode:"basic",template:"stylish",photo:"",name:"",englishName:"",role:"",email:"",phone:"",city:"",linkedin:"",summary:"",skills:"",education:"",vacancy:"",languages:[newLanguage()],experience:[newExperience()]});
 function newExperience(){return {id:crypto.randomUUID(),kind:"civilian",position:"",company:"",city:"",start:"",end:"",current:false,duties:""}}
+function newLanguage(){return {id:crypto.randomUUID(),language:"",level:""}}
 let state=fresh();
 let englishCv=null;
-try{const saved=JSON.parse(localStorage.getItem("careerResumeDraftV2"));if(saved)state={...state,...saved,photo:"",experience:Array.isArray(saved.experience)&&saved.experience.length?saved.experience:state.experience}}catch{}
+try{const saved=JSON.parse(localStorage.getItem("careerResumeDraftV2"));if(saved)state={...state,...saved,photo:"",languages:Array.isArray(saved.languages)&&saved.languages.length?saved.languages:state.languages,experience:Array.isArray(saved.experience)&&saved.experience.length?saved.experience:state.experience}}catch{}
 
 const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const cleanItem=value=>String(value||"").trim().replace(/^\s*[•●▪◦-]\s*/,"").trim();
@@ -35,6 +36,14 @@ document.querySelectorAll(".profile").forEach(button=>button.addEventListener("c
 
 document.querySelectorAll("[data-mode]").forEach(btn=>btn.addEventListener("click",()=>{state.mode=btn.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("active",x===btn));$("vacancySection").hidden=state.mode!=="vacancy";save()}));
 document.querySelectorAll("[data-template]").forEach(btn=>btn.addEventListener("click",()=>{state.template=btn.dataset.template;document.querySelectorAll("[data-template]").forEach(x=>x.classList.toggle("active",x===btn));$("paper").className=`paper ${state.template}`;save()}));
+
+function renderLanguages(){
+  const levels=["Native","C2 — Proficient","C1 — Advanced","B2 — Upper-Intermediate","B1 — Intermediate","A2 — Elementary","A1 — Beginner"];
+  $("languageList").innerHTML=state.languages.map(item=>`<div class="language-row" data-language-id="${esc(item.id)}"><input data-language-field="language" value="${esc(item.language)}" placeholder="Наприклад: English"><select data-language-field="level"><option value="">Оберіть рівень</option>${levels.map(level=>`<option value="${esc(level)}" ${item.level===level?"selected":""}>${esc(level)}</option>`).join("")}</select><button type="button" class="remove-entry" data-remove-language="${esc(item.id)}" ${state.languages.length===1?"hidden":""}>Видалити</button></div>`).join("");
+  document.querySelectorAll("[data-language-id]").forEach(row=>{const item=state.languages.find(x=>x.id===row.dataset.languageId);row.querySelectorAll("[data-language-field]").forEach(el=>el.addEventListener("input",event=>{item[event.target.dataset.languageField]=event.target.value;$("confirmEnglishWarnings").checked=false;save()}))});
+  document.querySelectorAll("[data-remove-language]").forEach(button=>button.addEventListener("click",()=>{state.languages=state.languages.filter(x=>x.id!==button.dataset.removeLanguage);if(!state.languages.length)state.languages=[newLanguage()];renderLanguages();save()}));
+}
+$("addLanguage").addEventListener("click",()=>{state.languages.push(newLanguage());renderLanguages();save()});
 
 function renderExperiences(){
   $("experienceList").innerHTML=state.experience.map((item,index)=>`<article class="experience-card" data-id="${esc(item.id)}">
@@ -75,7 +84,7 @@ async function askAI(action,extra={},button){
   if(action==="proofread"&&![state.role,state.city,state.summary,state.skills,state.education,...state.experience.flatMap(x=>[x.position,x.duties])].some(value=>String(value||"").trim()))throw new Error("Спочатку заповніть хоча б один текстовий розділ.");
   if(action==="adapt"&&!state.vacancy.trim())throw new Error("Спочатку вставте текст вакансії.");
   const old=button?.textContent;if(button){button.disabled=true;button.textContent="Зачекайте…"}showStatus("AI готує варіант. Ви зможете його відредагувати.");
-  try{const payload={profile:state.profile,action,data:{name:state.name,englishName:state.englishName,role:state.role,email:state.email,phone:state.phone,city:state.city,linkedin:state.linkedin,summary:state.summary,skills:state.skills,education:state.education,experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
+  try{const payload={profile:state.profile,action,data:{name:state.name,englishName:state.englishName,role:state.role,email:state.email,phone:state.phone,city:state.city,linkedin:state.linkedin,summary:state.summary,skills:state.skills,education:state.education,languages:state.languages.filter(x=>x.language||x.level),experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
 async function run(action,button,apply){try{apply(await askAI(action,{},button));save()}catch(error){showStatus(error.message,true)}}
 $("generateSummary").addEventListener("click",()=>run("summary",$("generateSummary"),result=>{$("summary").value=state.summary=result.summary||""}));
 $("generateSkills").addEventListener("click",()=>run("skills",$("generateSkills"),result=>{$("skills").value=state.skills=[...(result.hardSkills||[]),...(result.softSkills||[])].join("\n")}));
@@ -96,14 +105,39 @@ $("proofread").addEventListener("click",()=>run("proofread",$("proofread"),resul
   showStatus("Орфографію перевірено. Перегляньте виправлення перед завантаженням.");
 }));
 
+function markRequired(id,invalid){const element=$(id);if(element)element.closest(".field")?.classList.toggle("field-invalid",invalid)}
+function validateEnglishCv(){
+  document.querySelectorAll(".experience-card").forEach(card=>card.classList.remove("card-invalid"));
+  const errors=[];
+  const required=[
+    ["englishName",!state.englishName.trim(),"Вкажіть ім’я та прізвище латиницею."],
+    ["role",!state.role.trim(),"Вкажіть бажану посаду."],
+    ["email",!state.email.trim()||!$("email").checkValidity(),"Вкажіть коректний email."],
+    ["phone",!/^\+[\d\s()\-]{8,}$/.test(state.phone.trim()),"Вкажіть телефон у міжнародному форматі, наприклад +380 99 000 00 00."]
+  ];
+  for(const [id,invalid,message] of required){markRequired(id,invalid);if(invalid)errors.push(message)}
+  const used=state.experience.filter(item=>[item.position,item.company,item.start,item.end,item.duties].some(value=>String(value||"").trim()));
+  if(!used.length)errors.push("Додайте хоча б один блок досвіду роботи.");
+  for(const item of used){
+    const missing=[];if(!item.position.trim())missing.push("посаду");if(!item.company.trim())missing.push("компанію або Various Companies");if(!item.start.trim())missing.push("початок");if(!item.end.trim())missing.push("завершення або дотепер");if(!cleanItem(item.duties))missing.push("обов’язки");
+    if(missing.length){errors.push(`Досвід роботи: заповніть ${missing.join(", ")}.`);document.querySelector(`.experience-card[data-id="${CSS.escape(item.id)}"]`)?.classList.add("card-invalid")}
+  }
+  const languageErrors=state.languages.filter(x=>(x.language&&!x.level)||(!x.language&&x.level));
+  if(languageErrors.length)errors.push("Для кожної доданої мови вкажіть і назву, і рівень.");
+  const box=$("englishRequiredErrors");box.hidden=!errors.length;box.innerHTML=errors.length?`<b>Заповніть обов’язкові дані:</b><ul>${errors.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"";
+  const warnings=[];if(!state.linkedin.trim())warnings.push("Не вказано LinkedIn.");if(!state.photo)warnings.push("Не додано фотографію — версія без фото все одно буде доступна.");if(!state.education.trim())warnings.push("Не заповнено освіту.");if(!state.languages.some(x=>x.language&&x.level))warnings.push("Не додано жодної мови.");if(used.length===1)warnings.push("Вказано одне місце роботи. За потреби додайте або об’єднайте попередній релевантний досвід.");
+  const warningBox=$("englishWarnings");warningBox.hidden=!warnings.length;warningBox.innerHTML=warnings.length?`<b>Перевірте необов’язкові дані:</b><ul>${warnings.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"";
+  $("englishWarningConfirmRow").hidden=!warnings.length;
+  return {valid:!errors.length,warnings};
+}
 $("generateEnglishCv").addEventListener("click",async()=>{
   const button=$("generateEnglishCv");
   try{
-    if(!state.englishName.trim())throw new Error("Вкажіть ім’я та прізвище латиницею точно як у закордонному паспорті.");
-    if(!state.role.trim())throw new Error("Спочатку вкажіть бажану посаду.");
+    const check=validateEnglishCv();if(!check.valid)throw new Error("Заповніть поля, підсвічені червоним.");
+    if(check.warnings.length&&!$("confirmEnglishWarnings").checked)throw new Error("Перегляньте жовті попередження та підтвердьте продовження.");
     englishCv=await askAI("english_cv",{},button);
     if(!englishCv||typeof englishCv!=="object")throw new Error("Не вдалося створити English CV.");
-    $("englishCvStatus").hidden=false;$("englishCvStatus").textContent="English CV створено. Завантажте файли та перевірте переклад.";
+    $("englishCvStatus").hidden=false;$("englishCvStatus").className="status";$("englishCvStatus").textContent="English CV створено. Завантажте файли та перевірте переклад.";
     $("englishCvDownloads").hidden=false;
     $("englishPdfPhoto").hidden=!state.photo;$("englishDocPhoto").hidden=!state.photo;
   }catch(error){$("englishCvStatus").hidden=false;$("englishCvStatus").textContent=error.message;$("englishCvStatus").className="status error"}
@@ -135,4 +169,4 @@ $("pdf").addEventListener("click",()=>downloadResume("pdf",$("pdf")));
 $("doc").addEventListener("click",()=>downloadResume("docx",$("doc")));
 $("clear").addEventListener("click",()=>{if(!confirm("Очистити всі дані резюме?"))return;state=fresh();localStorage.removeItem("careerResumeDraftV2");location.reload()});
 
-document.querySelector(`[data-mode="${state.mode}"]`)?.click();document.querySelector(`[data-template="${state.template}"]`)?.click();renderExperiences();renderPhoto();renderPreview();
+document.querySelector(`[data-mode="${state.mode}"]`)?.click();document.querySelector(`[data-template="${state.template}"]`)?.click();renderExperiences();renderLanguages();renderPhoto();renderPreview();
