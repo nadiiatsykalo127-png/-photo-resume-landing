@@ -37,6 +37,19 @@ document.querySelectorAll(".profile").forEach(button=>button.addEventListener("c
 document.querySelectorAll("[data-mode]").forEach(btn=>btn.addEventListener("click",()=>{state.mode=btn.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("active",x===btn));$("vacancySection").hidden=state.mode!=="vacancy";save()}));
 document.querySelectorAll("[data-template]").forEach(btn=>btn.addEventListener("click",()=>{state.template=btn.dataset.template;document.querySelectorAll("[data-template]").forEach(x=>x.classList.toggle("active",x===btn));$("paper").className=`paper ${state.template}`;save()}));
 
+const resumeProfileTitles={civilian:"Цивільне резюме",civilian_military:"Цивільний + військовий досвід",medical:"Резюме медичного працівника"};
+function setDocumentView(view){
+  const english=view==="english";
+  $("builder").classList.toggle("document-english",english);
+  document.querySelectorAll("[data-document]").forEach(button=>button.classList.toggle("active",button.dataset.document===view));
+  $("builderTitle").textContent=english?"CV англійською":resumeProfileTitles[state.profile];
+  if(english)$("englishCvStatus").hidden=true;
+}
+document.querySelectorAll("[data-document]").forEach(button=>button.addEventListener("click",()=>{
+  setDocumentView(button.dataset.document);
+  window.scrollTo({top:0,behavior:"smooth"});
+}));
+
 function renderLanguages(){
   const levels=["Native","C2 — Proficient","C1 — Advanced","B2 — Upper-Intermediate","B1 — Intermediate","A2 — Elementary","A1 — Beginner"];
   $("languageList").innerHTML=state.languages.map(item=>`<div class="language-row" data-language-id="${esc(item.id)}"><input data-language-field="language" value="${esc(item.language)}" placeholder="Наприклад: English"><select data-language-field="level"><option value="">Оберіть рівень</option>${levels.map(level=>`<option value="${esc(level)}" ${item.level===level?"selected":""}>${esc(level)}</option>`).join("")}</select><button type="button" class="remove-entry" data-remove-language="${esc(item.id)}" ${state.languages.length===1?"hidden":""}>Видалити</button></div>`).join("");
@@ -183,7 +196,5 @@ if(validProfiles.includes(requestedProfile)){
   document.querySelector(`.profile[data-type="${requestedProfile}"]`)?.click();
 }else if(requestedDocument==="english"){
   document.querySelector('.profile[data-type="civilian"]')?.click();
-  window.setTimeout(()=>{
-    document.querySelector(".english-cv-panel")?.scrollIntoView({behavior:"smooth",block:"start"});
-  },150);
+  document.querySelector('[data-document="english"]')?.click();
 }
