@@ -152,7 +152,7 @@ $("generateEnglishCv").addEventListener("click",async()=>{
     englishCv=await askAI("english_cv",{},button);
     if(!englishCv||typeof englishCv!=="object")throw new Error("Не вдалося створити English CV.");
     if(Array.isArray(englishCv.languages)&&englishCv.languages.length){state.languages=englishCv.languages.filter(x=>x?.language&&x?.level).map(x=>({...newLanguage(),language:x.language,level:x.level}));renderLanguages();save()}
-    $("englishCvStatus").hidden=false;$("englishCvStatus").className="status";$("englishCvStatus").textContent="English CV створено. Завантажте файли та перевірте переклад.";
+    $("englishCvStatus").hidden=false;$("englishCvStatus").className="status";$("englishCvStatus").textContent="English CV створено: переклад, орфографію та граматику перевірено автоматично. Завантажте файли для остаточного перегляду.";
     $("englishCvDownloads").hidden=false;
     $("englishPdfPhoto").hidden=!state.photo;$("englishDocPhoto").hidden=!state.photo;
   }catch(error){$("englishCvStatus").hidden=false;$("englishCvStatus").textContent=error.message;$("englishCvStatus").className="status error"}
