@@ -33,7 +33,7 @@ function normalize(input={}){
     name:clip(input.name,150), role:clip(input.role,180), email:clip(input.email,200),
     phone:clip(input.phone,100), city:normalizeCity(input.city), linkedin:clip(input.linkedin,350),
     summary:clip(input.summary,3000), education:clip(input.education,3000),
-    skills:naturalSkills(input.skills), photo:clip(input.photo,8_000_000),
+    skills:naturalSkills(input.skills), languages:(Array.isArray(input.languages)?input.languages:[]).slice(0,10).map(item=>({language:clip(item?.language,80),level:clip(item?.level,80)})).filter(item=>item.language&&item.level), photo:clip(input.photo,8_000_000),
     experience:(Array.isArray(input.experience)?input.experience:[]).slice(0,12).map(item=>({
       kind:item?.kind==="military"?"military":"civilian", position:clip(item?.position,180),
       company:clip(item?.company,180), city:normalizeCity(item?.city), start:clip(item?.start,50),
@@ -80,6 +80,7 @@ export async function buildDocx(raw){
   }
   if(data.education){children.push(docHeading(en?"Education":"Освіта"));for(const line of clip(data.education).split("\n").filter(Boolean))children.push(docBody(line));}
   if(data.skills){children.push(docHeading(en?"Skills":"Навички"),docBody(data.skills));}
+  if(data.languages.length){children.push(docHeading(en?"Languages":"Мови"));for(const item of data.languages)children.push(docBody(`${item.language} — ${item.level}`));}
   const doc=new Document({
     creator:"nadinartdigital.com.ua",title:en?"CV":"Резюме",description:en?"CV created on nadinartdigital.com.ua":"Резюме, створене на nadinartdigital.com.ua",
     numbering:{config:[{reference:"resume-bullets",levels:[{level:0,format:LevelFormat.BULLET,text:"•",alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:360,hanging:220}},run:{font:"Arial",size:20,color:DARK}}}]}]},
@@ -125,5 +126,6 @@ export async function buildPdf(raw){
   }
   if(data.education){pdfSection(doc,en?"Education":"Освіта");doc.font("Resume").fontSize(9.2).fillColor(`#${DARK}`).text(data.education,{width,lineGap:3});}
   if(data.skills){pdfSection(doc,en?"Skills":"Навички");doc.font("Resume").fontSize(9.2).fillColor(`#${DARK}`).text(data.skills,{width,lineGap:3});}
+  if(data.languages.length){pdfSection(doc,en?"Languages":"Мови");doc.font("Resume").fontSize(9.2).fillColor(`#${DARK}`).text(data.languages.map(item=>`${item.language} — ${item.level}`).join("\n"),{width,lineGap:3});}
   doc.end();return output;
 }
