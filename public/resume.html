@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/app.css?v=20260911-1">
+  <link rel="stylesheet" href="/assets/app.css?v=20260911-3">
 </head>
 <body>
   <header class="top"><div class="wrap"><a class="brand" href="/career">AI для кар’єри</a><a class="back" href="/career">← На головну</a></div></header>
@@ -23,7 +23,7 @@
         <div><b id="builderTitle">Цивільне резюме</b><span>Усі підказки AI можна змінити вручну</span></div>
         <div class="toolbar-groups">
           <div class="segmented"><button data-mode="basic" class="active">Базовий</button><button data-mode="vacancy">Під вакансію</button></div>
-          <div class="segmented"><button data-template="standard">Стандартний</button><button data-template="stylish" class="active">Стильний</button></div>
+          <div class="segmented"><button data-template="standard">Стандартний</button><button data-template="stylish" class="active">Стильний</button></div><div class="segmented document-switch" aria-label="Вибір документа"><button data-document="ukrainian" class="active">Резюме UA</button><button data-document="english">English CV</button></div>
         </div>
       </div>
       <div class="enhanced-builder">
@@ -53,6 +53,7 @@
           <section id="vacancySection" class="panel card form-section vacancy-panel" hidden><h2>Адаптація під вакансію</h2><p class="small">Почніть із тексту вакансії. Вкажіть достовірні посади, місця роботи, дати та освіту — обов’язки й навички можна не заповнювати. AI заповнить усі текстові розділи разом, а ви перевірите й відредагуєте результат.</p><div class="field"><textarea id="vacancy" rows="6" placeholder="Скопіюйте текст вакансії"></textarea></div><button id="adaptVacancy" class="btn">✦ Заповнити резюме під вакансію</button></section>
           <div id="aiStatus" class="status" hidden></div>
           <section class="panel card form-section english-cv-panel">
+            <div class="english-source-note"><b>English CV — окрема версія документа.</b><span>Вона використовує дані з українського резюме. Щоб змінити основні дані, поверніться у вкладку «Резюме UA».</span></div>
             <div class="section-title"><div><h2>CV англійською</h2><p class="small">Тестова версія International English CV. Після перевірки послуга коштуватиме 79 грн.</p></div></div>
             <div class="form english-name-fields"><div class="field"><label for="englishGivenName">Ім’я латиницею <span class="required-mark">*</span></label><input id="englishGivenName" placeholder="Поле Given names у паспорті"><small>Наприклад: Hanna</small></div><div class="field"><label for="englishSurname">Прізвище латиницею <span class="required-mark">*</span></label><input id="englishSurname" placeholder="Поле Surname у паспорті"><small>Наприклад: Monanko</small></div></div><p class="small">Перепишіть обидва значення із закордонного паспорта. У CV вони будуть показані як: ім’я, потім прізвище.</p>
             <div class="language-heading"><div><b>Мови</b><p class="small">Можна додати декілька мов. Цей розділ не є обов’язковим.</p></div><button id="addLanguage" class="text-btn" type="button">＋ Додати мову</button></div>
@@ -85,6 +86,6 @@
     </section>
   </main>
   <div class="legal-links"><a href="/career/oferta">Публічна оферта</a><a href="/career/privacy">Конфіденційність</a><a href="https://forms.gle/Shp2k2sa2SBpRJQY7" target="_blank" rel="noopener">Зворотний зв’язок</a></div>
-  <script src="/assets/resume.js?v=20260911-5" defer></script>
+  <script src="/assets/resume.js?v=20260911-6" defer></script>
 </body>
 </html>
