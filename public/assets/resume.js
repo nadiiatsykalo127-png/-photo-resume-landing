@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const fresh = () => ({profile:"civilian",mode:"basic",template:"stylish",photo:"",name:"",englishName:"",role:"",email:"",phone:"",city:"",linkedin:"",summary:"",skills:"",education:"",vacancy:"",languages:[newLanguage()],experience:[newExperience()]});
+const fresh = () => ({profile:"civilian",mode:"basic",template:"stylish",photo:"",name:"",englishGivenName:"",englishSurname:"",role:"",email:"",phone:"",city:"",linkedin:"",summary:"",skills:"",education:"",vacancy:"",languages:[newLanguage()],experience:[newExperience()]});
 function newExperience(){return {id:crypto.randomUUID(),kind:"civilian",position:"",company:"",city:"",start:"",end:"",current:false,duties:""}}
 function newLanguage(){return {id:crypto.randomUUID(),language:"",level:""}}
 let state=fresh();
@@ -32,7 +32,7 @@ document.querySelectorAll(".profile").forEach(button=>button.addEventListener("c
   renderExperiences();save();window.scrollTo({top:0,behavior:"smooth"});
 }));
 
-["name","englishName","role","email","phone","city","linkedin","summary","skills","education","vacancy"].forEach(id=>bindField(id,id));
+["name","englishGivenName","englishSurname","role","email","phone","city","linkedin","summary","skills","education","vacancy"].forEach(id=>bindField(id,id));
 
 document.querySelectorAll("[data-mode]").forEach(btn=>btn.addEventListener("click",()=>{state.mode=btn.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("active",x===btn));$("vacancySection").hidden=state.mode!=="vacancy";save()}));
 document.querySelectorAll("[data-template]").forEach(btn=>btn.addEventListener("click",()=>{state.template=btn.dataset.template;document.querySelectorAll("[data-template]").forEach(x=>x.classList.toggle("active",x===btn));$("paper").className=`paper ${state.template}`;save()}));
@@ -84,7 +84,7 @@ async function askAI(action,extra={},button){
   if(action==="proofread"&&![state.role,state.city,state.summary,state.skills,state.education,...state.experience.flatMap(x=>[x.position,x.duties])].some(value=>String(value||"").trim()))throw new Error("Спочатку заповніть хоча б один текстовий розділ.");
   if(action==="adapt"&&!state.vacancy.trim())throw new Error("Спочатку вставте текст вакансії.");
   const old=button?.textContent;if(button){button.disabled=true;button.textContent="Зачекайте…"}showStatus("AI готує варіант. Ви зможете його відредагувати.");
-  try{const payload={profile:state.profile,action,data:{name:state.name,englishName:state.englishName,role:state.role,email:state.email,phone:state.phone,city:state.city,linkedin:state.linkedin,summary:state.summary,skills:state.skills,education:state.education,languages:state.languages.filter(x=>x.language||x.level),experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
+  try{const payload={profile:state.profile,action,data:{name:state.name,englishGivenName:state.englishGivenName,englishSurname:state.englishSurname,role:state.role,email:state.email,phone:state.phone,city:state.city,linkedin:state.linkedin,summary:state.summary,skills:state.skills,education:state.education,languages:state.languages.filter(x=>x.language||x.level),experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
 async function run(action,button,apply){try{apply(await askAI(action,{},button));save()}catch(error){showStatus(error.message,true)}}
 $("generateSummary").addEventListener("click",()=>run("summary",$("generateSummary"),result=>{$("summary").value=state.summary=result.summary||""}));
 $("generateSkills").addEventListener("click",()=>run("skills",$("generateSkills"),result=>{$("skills").value=state.skills=[...(result.hardSkills||[]),...(result.softSkills||[])].join("\n")}));
@@ -110,7 +110,8 @@ function validateEnglishCv(){
   document.querySelectorAll(".experience-card").forEach(card=>card.classList.remove("card-invalid"));
   const errors=[];
   const required=[
-    ["englishName",!state.englishName.trim(),"Вкажіть ім’я та прізвище латиницею."],
+    ["englishGivenName",!state.englishGivenName.trim()||/[А-Яа-яІіЇїЄєҐґ]/.test(state.englishGivenName),"Вкажіть ім’я латиницею як у полі Given names."],
+    ["englishSurname",!state.englishSurname.trim()||/[А-Яа-яІіЇїЄєҐґ]/.test(state.englishSurname),"Вкажіть прізвище латиницею як у полі Surname."],
     ["role",!state.role.trim(),"Вкажіть бажану посаду."],
     ["email",!state.email.trim()||!$("email").checkValidity(),"Вкажіть коректний email."],
     ["phone",!/^\+[\d\s()\-]{8,}$/.test(state.phone.trim()),"Вкажіть телефон у міжнародному форматі, наприклад +380 99 000 00 00."]
