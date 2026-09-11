@@ -38,3 +38,17 @@
 .photo-faq-list h3{margin:0;color:#214b2b;font-size:1rem}
 .photo-faq-list p{margin:7px 0 0;color:#46634d;line-height:1.6}
 @media(max-width:760px){.photo-faq{margin:20px 16px 32px;padding:20px}}
+
+
+/* Resume document tabs */
+.english-cv-panel{display:none}
+.document-switch button[data-document="english"]{background:var(--blue);color:#fff;box-shadow:0 3px 10px #19295725}
+.document-switch button[data-document="english"]:hover,.document-switch button[data-document="english"].active{background:var(--deep);color:#fff}
+.document-switch button[data-document="ukrainian"].active{background:#fff;color:var(--blue)}
+.resume-workspace.document-english .editor-stack> :not(.english-cv-panel){display:none!important}
+.resume-workspace.document-english .english-cv-panel{display:block}
+.resume-workspace.document-english .preview-column{display:none}
+.resume-workspace.document-english .enhanced-builder{grid-template-columns:minmax(0,860px);justify-content:center}
+.english-source-note{display:grid;gap:5px;margin:0 0 20px;padding:14px 16px;border-radius:12px;background:#e9efff;color:#31415d;line-height:1.5}
+.english-source-note span{font-size:13px}
+@media(max-width:700px){.document-switch{order:-1}.toolbar-groups{gap:8px}.resume-workspace.document-english .enhanced-builder{display:block}}
