@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI для кар'єри — фото та резюме за хвилини</title>
-<meta name="description" content="Професійне AI-фото для резюме та три безкоштовні конструктори резюме для цивільних, ветеранів і медичних працівників.">
+<meta name="description" content="Професійне AI-фото для резюме та конструктори резюме українською та International English CV для цивільних, ветеранів і медичних працівників.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -256,7 +256,7 @@
 
   .steps{
     display:grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 28px;
   }
   .step{
@@ -452,7 +452,11 @@
     border-radius: 18px;
     padding: 28px 24px;
     position:relative;
+    display:flex; flex-direction:column; text-decoration:none; color:inherit;
+    transition:transform .18s ease, box-shadow .18s ease;
   }
+  .profile-card:hover{ transform:translateY(-3px); box-shadow:0 14px 30px rgba(12,45,90,.16); }
+  .profile-card .card-arrow{ margin-top:auto; padding-top:18px; color:#246b45; font-weight:800; }
   .profile-card .icon{
     width:42px; height:42px; border-radius:12px;
     background: #cdedcf; color: #2f7a3f;
@@ -697,52 +701,31 @@
     </div>
 
     <div class="profile-grid">
-      <div class="profile-card">
+      <a class="profile-card" href="/career/resume?profile=civilian">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div>
         <h3>Цивільний досвід</h3>
         <p>Звичайний конструктор резюме для будь-якої цивільної кар'єри.</p>
-      </div>
-      <div class="profile-card">
+        <span class="card-arrow">Створити резюме →</span>
+      </a>
+      <a class="profile-card" href="/career/resume?profile=civilian_military">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6z"/></svg></div>
         <h3>Цивільний + військовий досвід</h3>
         <p>Перекладає військовий досвід цивільною мовою — за принципом Veteran Hub, без прикрас і без вигаданих фактів.</p>
-      </div>
-      <div class="profile-card">
+        <span class="card-arrow">Створити резюме →</span>
+      </a>
+      <a class="profile-card" href="/career/resume?profile=medical">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M9 5h6M12 22c-4-2-7-5-7-9V6l7-3 7 3v7c0 4-3 7-7 9z"/></svg></div>
         <h3>Медичний працівник</h3>
         <p>Спеціалізований конструктор для лікарів, медсестер, фельдшерів та інших медичних фахівців.</p>
-      </div>
-    </div>
-
-    <div class="resume-cta">
-      <a class="btn-primary" href="/career/resume">
-        Створити резюме
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        <span class="card-arrow">Створити резюме →</span>
       </a>
-      <div class="price-note">Безкоштовно, без реєстрації</div>
-    </div>
-  </div>
-</section>
-
-<section class="faq">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Питання</div>
-      <h2>Часті запитання</h2>
-    </div>
-    <div class="faq-list">
-      <div class="faq-item">
-        <h3>Моє обличчя точно не зміниться?</h3>
-        <p>Ні, риси обличчя, міміка та зачіска зберігаються — змінюється лише фон і одяг нижче шиї.</p>
-      </div>
-      <div class="faq-item">
-        <h3>Яке фото краще завантажити?</h3>
-        <p>Найкраще підходить фото анфас з нейтральним виразом обличчя, без окулярів чи капелюхів на голові та без надто складного заднього плану.</p>
-      </div>
-      <div class="faq-item">
-        <h3>Що буде з моїм фото після обробки?</h3>
-        <p>Завантажений оригінал використовується лише під час AI-обробки. Згенеровані варіанти тимчасово зберігаються у приватному сховищі та автоматично видаляються після завантаження або протягом 24 годин.</p>
-      </div>
+      <a class="profile-card" href="/career/resume?document=english">
+        <span class="badge soon">Тестова версія</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h8"/><path d="M17 14l3 3-3 3"/></svg></div>
+        <h3>CV англійською</h3>
+        <p>International English CV: професійна адаптація, версії з фото та без фото у PDF і DOCX.</p>
+        <span class="card-arrow">Створити English CV →</span>
+      </a>
     </div>
   </div>
 </section>
