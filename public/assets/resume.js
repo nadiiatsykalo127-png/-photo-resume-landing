@@ -1,7 +1,8 @@
 const $ = id => document.getElementById(id);
-const fresh = () => ({profile:"civilian",mode:"basic",template:"stylish",photo:"",name:"",role:"",email:"",phone:"",city:"",linkedin:"",summary:"",skills:"",education:"",vacancy:"",experience:[newExperience()]});
+const fresh = () => ({profile:"civilian",mode:"basic",template:"stylish",photo:"",name:"",englishName:"",role:"",email:"",phone:"",city:"",linkedin:"",summary:"",skills:"",education:"",vacancy:"",experience:[newExperience()]});
 function newExperience(){return {id:crypto.randomUUID(),kind:"civilian",position:"",company:"",city:"",start:"",end:"",current:false,duties:""}}
 let state=fresh();
+let englishCv=null;
 try{const saved=JSON.parse(localStorage.getItem("careerResumeDraftV2"));if(saved)state={...state,...saved,photo:"",experience:Array.isArray(saved.experience)&&saved.experience.length?saved.experience:state.experience}}catch{}
 
 const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -30,7 +31,7 @@ document.querySelectorAll(".profile").forEach(button=>button.addEventListener("c
   renderExperiences();save();window.scrollTo({top:0,behavior:"smooth"});
 }));
 
-["name","role","email","phone","city","linkedin","summary","skills","education","vacancy"].forEach(id=>bindField(id,id));
+["name","englishName","role","email","phone","city","linkedin","summary","skills","education","vacancy"].forEach(id=>bindField(id,id));
 
 document.querySelectorAll("[data-mode]").forEach(btn=>btn.addEventListener("click",()=>{state.mode=btn.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("active",x===btn));$("vacancySection").hidden=state.mode!=="vacancy";save()}));
 document.querySelectorAll("[data-template]").forEach(btn=>btn.addEventListener("click",()=>{state.template=btn.dataset.template;document.querySelectorAll("[data-template]").forEach(x=>x.classList.toggle("active",x===btn));$("paper").className=`paper ${state.template}`;save()}));
@@ -74,7 +75,7 @@ async function askAI(action,extra={},button){
   if(action==="proofread"&&![state.role,state.city,state.summary,state.skills,state.education,...state.experience.flatMap(x=>[x.position,x.duties])].some(value=>String(value||"").trim()))throw new Error("Спочатку заповніть хоча б один текстовий розділ.");
   if(action==="adapt"&&!state.vacancy.trim())throw new Error("Спочатку вставте текст вакансії.");
   const old=button?.textContent;if(button){button.disabled=true;button.textContent="Зачекайте…"}showStatus("AI готує варіант. Ви зможете його відредагувати.");
-  try{const payload={profile:state.profile,action,data:{role:state.role,city:state.city,summary:state.summary,skills:state.skills,education:state.education,experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
+  try{const payload={profile:state.profile,action,data:{name:state.name,englishName:state.englishName,role:state.role,email:state.email,phone:state.phone,city:state.city,linkedin:state.linkedin,summary:state.summary,skills:state.skills,education:state.education,experience:state.experience.map(({photo,...x})=>x)},vacancy:state.vacancy,...extra};const response=await fetch("/api/resume/assist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||"AI тимчасово недоступний.");showStatus("Готово. Перевірте й відредагуйте пропозицію.");return result}finally{if(button){button.disabled=false;button.textContent=old}}}
 async function run(action,button,apply){try{apply(await askAI(action,{},button));save()}catch(error){showStatus(error.message,true)}}
 $("generateSummary").addEventListener("click",()=>run("summary",$("generateSummary"),result=>{$("summary").value=state.summary=result.summary||""}));
 $("generateSkills").addEventListener("click",()=>run("skills",$("generateSkills"),result=>{$("skills").value=state.skills=[...(result.hardSkills||[]),...(result.softSkills||[])].join("\n")}));
@@ -94,6 +95,36 @@ $("proofread").addEventListener("click",()=>run("proofread",$("proofread"),resul
   if(Array.isArray(result.experience)){for(const corrected of result.experience){const item=state.experience.find(x=>x.id===corrected.id);if(!item)continue;if(typeof corrected.position==="string")item.position=corrected.position;if(typeof corrected.city==="string")item.city=corrected.city;if(typeof corrected.duties==="string")item.duties=corrected.duties;item.city=normalizeCity(item.city)}renderExperiences()}
   showStatus("Орфографію перевірено. Перегляньте виправлення перед завантаженням.");
 }));
+
+$("generateEnglishCv").addEventListener("click",async()=>{
+  const button=$("generateEnglishCv");
+  try{
+    if(!state.englishName.trim())throw new Error("Вкажіть ім’я та прізвище латиницею точно як у закордонному паспорті.");
+    if(!state.role.trim())throw new Error("Спочатку вкажіть бажану посаду.");
+    englishCv=await askAI("english_cv",{},button);
+    if(!englishCv||typeof englishCv!=="object")throw new Error("Не вдалося створити English CV.");
+    $("englishCvStatus").hidden=false;$("englishCvStatus").textContent="English CV створено. Завантажте файли та перевірте переклад.";
+    $("englishCvDownloads").hidden=false;
+    $("englishPdfPhoto").hidden=!state.photo;$("englishDocPhoto").hidden=!state.photo;
+  }catch(error){$("englishCvStatus").hidden=false;$("englishCvStatus").textContent=error.message;$("englishCvStatus").className="status error"}
+});
+
+async function downloadEnglishCv(format,withPhoto,button){
+  if(!englishCv)return showStatus("Спочатку створіть тестове CV англійською.",true);
+  const old=button.textContent;button.disabled=true;button.textContent="Готуємо…";
+  try{
+    const payload={...englishCv,profile:state.profile,template:state.template,language:"en",photo:withPhoto?state.photo:""};
+    const response=await fetch(`/api/resume/${format}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!response.ok){let message="Не вдалося створити файл.";try{message=(await response.json()).error||message}catch{}throw new Error(message)}
+    const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=`english-cv-${withPhoto?"with-photo":"without-photo"}.${format}`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    showStatus("English CV завантажено. Перевірте текст і оформлення.");
+  }catch(error){showStatus(error.message,true)}finally{button.disabled=false;button.textContent=old}
+}
+$("englishPdfPhoto").addEventListener("click",()=>downloadEnglishCv("pdf",true,$("englishPdfPhoto")));
+$("englishDocPhoto").addEventListener("click",()=>downloadEnglishCv("docx",true,$("englishDocPhoto")));
+$("englishPdfNoPhoto").addEventListener("click",()=>downloadEnglishCv("pdf",false,$("englishPdfNoPhoto")));
+$("englishDocNoPhoto").addEventListener("click",()=>downloadEnglishCv("docx",false,$("englishDocNoPhoto")));
 
 async function downloadResume(format,button){
   const old=button.textContent;button.disabled=true;button.textContent="Готуємо…";showStatus(`Створюємо ${format.toUpperCase()} з вашим оформленням.`);
