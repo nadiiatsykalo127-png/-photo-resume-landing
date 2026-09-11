@@ -24,6 +24,7 @@ const naturalSkills=value=>{
   return normalized.join(", ").replace(/[.;,\s]+$/,"")+".";
 };
 const duties=value=>clip(value).split("\n").map(cleanBullet).filter(Boolean);
+const englishSkills=value=>{const items=splitLines(value);return items.length?items.join(", ").replace(/[.;,\s]+$/,"")+".":""};
 const normalizeCity=value=>clip(value,120).replace(/Днепр|Киев/giu,match=>({днепр:"Дніпро",киев:"Київ"}[match.toLocaleLowerCase("uk-UA")]||match));
 const contactLine=data=>[data.email,data.phone,data.city,data.linkedin].map(x=>clip(x,300)).filter(Boolean).join(" • ");
 
@@ -33,7 +34,7 @@ function normalize(input={}){
     name:clip(input.name,150), role:clip(input.role,180), email:clip(input.email,200),
     phone:clip(input.phone,100), city:normalizeCity(input.city), linkedin:clip(input.linkedin,350),
     summary:clip(input.summary,3000), education:clip(input.education,3000),
-    skills:naturalSkills(input.skills), languages:(Array.isArray(input.languages)?input.languages:[]).slice(0,10).map(item=>({language:clip(item?.language,80),level:clip(item?.level,80)})).filter(item=>item.language&&item.level), photo:clip(input.photo,8_000_000),
+    skills:input.language==="en"?englishSkills(input.skills):naturalSkills(input.skills), languages:(Array.isArray(input.languages)?input.languages:[]).slice(0,10).map(item=>({language:clip(item?.language,80),level:clip(item?.level,80)})).filter(item=>item.language&&item.level), photo:clip(input.photo,8_000_000),
     experience:(Array.isArray(input.experience)?input.experience:[]).slice(0,12).map(item=>({
       kind:item?.kind==="military"?"military":"civilian", position:clip(item?.position,180),
       company:clip(item?.company,180), city:normalizeCity(item?.city), start:clip(item?.start,50),
