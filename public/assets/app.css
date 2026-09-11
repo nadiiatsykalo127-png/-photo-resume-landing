@@ -28,3 +28,13 @@
 .confirm-row{display:flex;gap:10px;align-items:flex-start;margin:12px 0 16px;line-height:1.4}
 .confirm-row input{margin-top:3px}
 @media(max-width:640px){.language-row{grid-template-columns:1fr}.language-heading{display:grid}.language-heading .text-btn{justify-self:start}}
+
+
+.photo-faq{max-width:920px;margin:28px auto 40px;padding:28px}
+.photo-faq .eyebrow{color:#3155e8;font-weight:800;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+.photo-faq h2{margin:6px 0 18px}
+.photo-faq-list{display:grid;gap:1px;background:#d8e9da;border:1px solid #d8e9da;border-radius:14px;overflow:hidden}
+.photo-faq-list article{background:#eff9ef;padding:20px 22px}
+.photo-faq-list h3{margin:0;color:#214b2b;font-size:1rem}
+.photo-faq-list p{margin:7px 0 0;color:#46634d;line-height:1.6}
+@media(max-width:760px){.photo-faq{margin:20px 16px 32px;padding:20px}}
