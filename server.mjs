@@ -72,7 +72,7 @@ app.post("/api/payment/create",async(req,res,next)=>{
   if(!monoToken)return res.status(503).json({error:monoPaymentMode==="test"?"Тестовий токен Monobank не налаштований.":"Автоматична оплата буде доступна після активації Monobank API."});
   job.selected=index;
   const reference=`photo:${jobId}`;
-  const mono=await fetch("https://api.monobank.ua/api/merchant/invoice/create",{method:"POST",headers:{"content-type":"application/json","X-Token":monoToken},body:JSON.stringify({amount:4900,ccy:980,merchantPaymInfo:{reference,destination:"Фото для резюме без водяного знака",basketOrder:[{name:"Фото для резюме",qty:1,sum:4900,unit:"шт.",code:"career-photo"}]},redirectUrl:`${baseUrl}/career/photo?order=${jobId}`,webHookUrl:`${baseUrl}/api/payment/webhook`})});
+  const mono=await fetch("https://api.monobank.ua/api/merchant/invoice/create",{method:"POST",headers:{"content-type":"application/json","X-Token":monoToken},body:JSON.stringify({amount:5900,ccy:980,merchantPaymInfo:{reference,destination:"Фото для резюме без водяного знака",basketOrder:[{name:"Фото для резюме",qty:1,sum:5900,unit:"шт.",code:"career-photo"}]},redirectUrl:`${baseUrl}/career/photo?order=${jobId}`,webHookUrl:`${baseUrl}/api/payment/webhook`})});
   const body=await mono.json();if(!mono.ok)throw new Error(body.errText||"Monobank не створив рахунок");job.invoiceId=body.invoiceId;await saveJob(jobId,job);res.json({pageUrl:body.pageUrl});
  }catch(error){next(error)}
 });
