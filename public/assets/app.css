@@ -9,3 +9,22 @@
 @media(max-width:560px){.resume-toolbar{padding:15px}.toolbar-groups{width:100%}.segmented{width:100%}.segmented button{flex:1}.resume-paper-head,.paper-body{padding:25px}.resume-photo-upload{align-items:flex-start}.ai-heading{align-items:flex-start;flex-direction:column}.mini-ai{align-self:flex-start}}
 @media print{body{background:#fff}.resume-workspace{display:block!important;padding:0}.resume-toolbar,.editor-stack,.preview-actions,.preview-help,.profiles,.resume-intro{display:none!important}.enhanced-builder{display:block}.preview-column{position:static}.paper{box-shadow:none;border:0;min-height:0}.paper.stylish{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 .paper-photo{width:78px;height:104px;border-radius:8px;background:none;overflow:hidden}.paper-photo img{width:100%;height:100%;display:block;object-fit:contain}.military-note{margin:9px 0 0;color:#7a5a00}
+
+
+/* English CV validation */
+.required-mark{color:#c93434}
+.language-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-top:18px}
+.language-heading p{margin:4px 0 0}
+.language-list{display:grid;gap:10px;margin:12px 0 18px}
+.language-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center}
+.language-row input,.language-row select{width:100%;min-width:0;border:1px solid #ccd4e3;border-radius:10px;padding:12px;background:#fff;color:#1c2b45;font:inherit}
+.english-cv-note{display:grid;gap:4px;margin:14px 0;padding:14px 16px;border-radius:12px;background:#eef4ff;color:#31415d}
+.validation-box{margin:14px 0;padding:14px 16px;border-radius:12px}
+.validation-box ul{margin:8px 0 0;padding-left:20px}
+.validation-box.error{background:#fff0f0;border:1px solid #e8a6a6;color:#8e2424}
+.validation-box.warning{background:#fff7df;border:1px solid #e5c66a;color:#6e5311}
+.field-invalid input,.field-invalid textarea,.field-invalid select,.card-invalid input,.card-invalid textarea{border-color:#d43b3b!important;box-shadow:0 0 0 2px rgba(212,59,59,.12)}
+.card-invalid{border-color:#d43b3b!important}
+.confirm-row{display:flex;gap:10px;align-items:flex-start;margin:12px 0 16px;line-height:1.4}
+.confirm-row input{margin-top:3px}
+@media(max-width:640px){.language-row{grid-template-columns:1fr}.language-heading{display:grid}.language-heading .text-btn{justify-self:start}}
