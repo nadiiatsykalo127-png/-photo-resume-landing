@@ -171,4 +171,19 @@ $("pdf").addEventListener("click",()=>downloadResume("pdf",$("pdf")));
 $("doc").addEventListener("click",()=>downloadResume("docx",$("doc")));
 $("clear").addEventListener("click",()=>{if(!confirm("Очистити всі дані резюме?"))return;state=fresh();localStorage.removeItem("careerResumeDraftV2");location.reload()});
 
-document.querySelector(`[data-mode="${state.mode}"]`)?.click();document.querySelector(`[data-template="${state.template}"]`)?.click();renderExperiences();renderLanguages();renderPhoto();renderPreview();
+document.querySelector(`[data-mode="${state.mode}"]`)?.click();
+document.querySelector(`[data-template="${state.template}"]`)?.click();
+renderExperiences();renderLanguages();renderPhoto();renderPreview();
+
+const entryParams=new URLSearchParams(window.location.search);
+const requestedProfile=entryParams.get("profile");
+const requestedDocument=entryParams.get("document");
+const validProfiles=["civilian","civilian_military","medical"];
+if(validProfiles.includes(requestedProfile)){
+  document.querySelector(`.profile[data-type="${requestedProfile}"]`)?.click();
+}else if(requestedDocument==="english"){
+  document.querySelector('.profile[data-type="civilian"]')?.click();
+  window.setTimeout(()=>{
+    document.querySelector(".english-cv-panel")?.scrollIntoView({behavior:"smooth",block:"start"});
+  },150);
+}
