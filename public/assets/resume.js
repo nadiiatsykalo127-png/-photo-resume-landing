@@ -108,13 +108,24 @@ $("adaptVacancy").addEventListener("click",()=>run("adapt",$("adaptVacancy"),res
   if(Array.isArray(result.experience)){for(const suggestion of result.experience){const item=state.experience.find(x=>x.id===suggestion.id);if(item&&Array.isArray(suggestion.functions))item.duties=suggestion.functions.map(x=>`• ${cleanItem(x)}`).join("\n")}renderExperiences()}
 }));
 
-$("proofread").addEventListener("click",()=>run("proofread",$("proofread"),result=>{
+let lastUkrainianProofreadSignature="";
+function ukrainianProofreadSignature(){
+  return JSON.stringify({profile:state.profile,role:state.role,city:state.city,summary:state.summary,skills:state.skills,education:state.education,experience:state.experience.map(({id,position,city,duties})=>({id,position,city,duties}))});
+}
+function hasUkrainianText(){
+  return [state.role,state.city,state.summary,state.skills,state.education,...state.experience.flatMap(x=>[x.position,x.city,x.duties])].some(value=>String(value||"").trim());
+}
+function applyUkrainianProofread(result){
   if(typeof result.role==="string")$("role").value=state.role=result.role;
   $("city").value=state.city=normalizeCity(typeof result.city==="string"?result.city:state.city);
   if(typeof result.summary==="string")$("summary").value=state.summary=result.summary;
   if(typeof result.skills==="string")$("skills").value=state.skills=result.skills;
   if(typeof result.education==="string")$("education").value=state.education=result.education;
   if(Array.isArray(result.experience)){for(const corrected of result.experience){const item=state.experience.find(x=>x.id===corrected.id);if(!item)continue;if(typeof corrected.position==="string")item.position=corrected.position;if(typeof corrected.city==="string")item.city=corrected.city;if(typeof corrected.duties==="string")item.duties=corrected.duties;item.city=normalizeCity(item.city)}renderExperiences()}
+  lastUkrainianProofreadSignature=ukrainianProofreadSignature();
+}
+$("proofread").addEventListener("click",()=>run("proofread",$("proofread"),result=>{
+  applyUkrainianProofread(result);
   showStatus("Орфографію перевірено. Перегляньте виправлення перед завантаженням.");
 }));
 
@@ -177,8 +188,21 @@ $("englishDocNoPhoto").addEventListener("click",()=>downloadEnglishCv("docx",fal
 
 async function downloadResume(format,button){
   const old=button.textContent;button.disabled=true;button.textContent="Готуємо…";showStatus(`Створюємо ${format.toUpperCase()} з вашим оформленням.`);
-  try{const response=await fetch(`/api/resume/${format}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)});if(!response.ok){let message="Не вдалося створити файл.";try{message=(await response.json()).error||message}catch{}throw new Error(message)}const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`nadinartdigital.com.ua.${format}`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);showStatus("Файл готовий. Перевірте папку завантажень.")}
-  catch(error){showStatus(error.message,true)}finally{button.disabled=false;button.textContent=old}
+  try{
+    const currentSignature=ukrainianProofreadSignature();
+    if(hasUkrainianText()&&currentSignature!==lastUkrainianProofreadSignature){
+      button.textContent="Перевіряємо текст…";
+      const corrected=await askAI("proofread");
+      applyUkrainianProofread(corrected);
+      save();
+      button.textContent="Створюємо файл…";
+    }
+    const response=await fetch(`/api/resume/${format}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)});
+    if(!response.ok){let message="Не вдалося створити файл.";try{message=(await response.json()).error||message}catch{}throw new Error(message)}
+    const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=`nadinartdigital.com.ua.${format}`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    showStatus("Текст перевірено, файл готовий. Перевірте папку завантажень.");
+  }catch(error){showStatus(error.message,true)}finally{button.disabled=false;button.textContent=old}
 }
 $("pdf").addEventListener("click",()=>downloadResume("pdf",$("pdf")));
 $("doc").addEventListener("click",()=>downloadResume("docx",$("doc")));
