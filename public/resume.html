@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/app.css?v=20260911-3">
+  <link rel="stylesheet" href="/assets/app.css?v=20260911-4">
 </head>
 <body>
   <header class="top"><div class="wrap"><a class="brand" href="/career">AI для кар’єри</a><a class="back" href="/career">← На головну</a></div></header>
@@ -53,8 +53,16 @@
           <section id="vacancySection" class="panel card form-section vacancy-panel" hidden><h2>Адаптація під вакансію</h2><p class="small">Почніть із тексту вакансії. Вкажіть достовірні посади, місця роботи, дати та освіту — обов’язки й навички можна не заповнювати. AI заповнить усі текстові розділи разом, а ви перевірите й відредагуєте результат.</p><div class="field"><textarea id="vacancy" rows="6" placeholder="Скопіюйте текст вакансії"></textarea></div><button id="adaptVacancy" class="btn">✦ Заповнити резюме під вакансію</button></section>
           <div id="aiStatus" class="status" hidden></div>
           <section class="panel card form-section english-cv-panel">
-            <div class="english-source-note"><b>English CV — окрема версія документа.</b><span>Вона використовує дані з українського резюме. Щоб змінити основні дані, поверніться у вкладку «Резюме UA».</span></div>
-            <div class="section-title"><div><h2>CV англійською</h2><p class="small">Переклад, англійська орфографія та граматика перевіряються автоматично під час створення документа. Після тестування послуга коштуватиме 79 грн.</p></div></div>
+            <div class="english-journey">
+              <div><h2>Як створити English CV</h2><p>Вихідні дані можна заповнювати українською — сервіс сам перекладе й професійно адаптує текст.</p></div>
+              <ol class="english-steps">
+                <li><span>1</span><div><b>Заповніть дані</b><small>Контакти, бажана посада, досвід, освіта й навички у вкладці «Резюме UA».</small></div></li>
+                <li><span>2</span><div><b>Додайте дані для English CV</b><small>Ім’я та прізвище латиницею, а також мови й рівні володіння.</small></div></li>
+                <li><span>3</span><div><b>Створіть і завантажте</b><small>AI перекладе, адаптує та перевірить текст. Ви отримаєте PDF і DOCX з фото та без фото.</small></div></li>
+              </ol>
+              <button id="openSourceResume" class="btn outline" type="button">Крок 1. Заповнити або перевірити дані →</button>
+            </div>
+            <div class="section-title english-step-title"><div><h2>Крок 2. Дані для English CV</h2><p class="small">Переклад, англійська орфографія та граматика перевіряються автоматично. Після тестування послуга коштуватиме 79 грн.</p></div></div>
             <div class="form english-name-fields"><div class="field"><label for="englishGivenName">Ім’я латиницею <span class="required-mark">*</span></label><input id="englishGivenName" placeholder="Поле Given names у паспорті"><small>Наприклад: Hanna</small></div><div class="field"><label for="englishSurname">Прізвище латиницею <span class="required-mark">*</span></label><input id="englishSurname" placeholder="Поле Surname у паспорті"><small>Наприклад: Monanko</small></div></div><p class="small">Перепишіть обидва значення із закордонного паспорта. У CV вони будуть показані як: ім’я, потім прізвище.</p>
             <div class="language-heading"><div><b>Мови</b><p class="small">Можна додати декілька мов. Цей розділ не є обов’язковим.</p></div><button id="addLanguage" class="text-btn" type="button">＋ Додати мову</button></div>
             <div id="languageList" class="language-list"></div>
@@ -62,6 +70,7 @@
             <div id="englishRequiredErrors" class="validation-box error" hidden></div>
             <div id="englishWarnings" class="validation-box warning" hidden></div>
             <label id="englishWarningConfirmRow" class="confirm-row" hidden><input id="confirmEnglishWarnings" type="checkbox"> Я перевірила дані та хочу продовжити без необов’язкових полів.</label>
+            <div class="english-final-step"><span>3</span><div><b>Створення документа</b><small>Перевірте введені дані та натисніть кнопку. Переклад і виправлення виконаються автоматично.</small></div></div>
             <button id="generateEnglishCv" class="btn">✦ Створити й перевірити English CV</button>
             <div id="englishCvStatus" class="status" hidden></div>
             <div id="englishCvDownloads" hidden>
@@ -86,6 +95,6 @@
     </section>
   </main>
   <div class="legal-links"><a href="/career/oferta">Публічна оферта</a><a href="/career/privacy">Конфіденційність</a><a href="https://forms.gle/Shp2k2sa2SBpRJQY7" target="_blank" rel="noopener">Зворотний зв’язок</a></div>
-  <script src="/assets/resume.js?v=20260911-8" defer></script>
+  <script src="/assets/resume.js?v=20260911-9" defer></script>
 </body>
 </html>
