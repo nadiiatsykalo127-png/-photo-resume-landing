@@ -52,9 +52,9 @@
   img{ max-width:100%; display:block; }
 
   .wrap{
-    max-width: 1080px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 28px;
   }
 
   /* ---------- NAV ---------- */
@@ -248,7 +248,7 @@
   .trust-item svg{ width:18px; height:18px; color: var(--mint); flex-shrink:0; }
 
   /* ---------- HOW IT WORKS ---------- */
-  section.how{ padding: 92px 0; }
+  section.how{ padding: 68px 0; }
   .section-head{ max-width: 60ch; margin-bottom: 52px; }
   .section-head .eyebrow{ margin-bottom: 14px; }
   .section-head h2{ font-size: clamp(1.6rem, 3vw, 2.2rem); color: #fff; }
@@ -256,8 +256,8 @@
 
   .steps{
     display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 28px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
   }
   .step{
     background: var(--mint);
@@ -288,7 +288,7 @@
 
   /* ---------- WHAT YOU GET ---------- */
   section.spec{
-    padding: 0 0 96px;
+    padding: 0 0 68px;
   }
   .spec-card{
     background: var(--bg-blue-deep);
@@ -433,24 +433,25 @@
     margin-top: 32px;
     border-radius: 20px;
     overflow: hidden;
-    aspect-ratio: 21/9;
+    aspect-ratio: 24/7;
+    max-height: 360px;
     border: 1px solid rgba(255,255,255,0.14);
   }
   .resume-banner img{ width:100%; height:100%; object-fit:cover; display:block; }
 
   /* ---------- RESUME SECTION ---------- */
-  section.resume{ padding: 92px 0; }
+  section.resume{ padding: 68px 0; }
   .profile-grid{
     display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
     margin-top: 16px;
   }
   .profile-card{
     background: var(--mint);
     border: 1px solid var(--mint-line);
     border-radius: 18px;
-    padding: 28px 24px;
+    padding: 24px 20px;
     position:relative;
     display:flex; flex-direction:column; text-decoration:none; color:inherit;
     transition:transform .18s ease, box-shadow .18s ease;
@@ -503,7 +504,7 @@
     .spec-visual{ order:-1; }
   }
 
-  .service-offers{ background:linear-gradient(180deg,#dce7ff 0%,#eef3ff 100%); padding:78px 0; }
+  .service-offers{ background:linear-gradient(180deg,#dce7ff 0%,#eef3ff 100%); padding:62px 0; }
   .service-offers .section-head h2{color:#17336f}
   .service-offers .section-head>p{color:#4f5d78}
   .service-offers .eyebrow{color:#3155e8}
@@ -668,25 +669,6 @@
         <div class="frame"><img src="after2.jpg" alt="Варіант 2" style="width:100%; height:100%; object-fit:cover;"><span>Варіант 2</span></div>
         <div class="frame"><img src="after3.jpg" alt="Варіант 3" style="width:100%; height:100%; object-fit:cover;"><span>Варіант 3</span></div>
       </div>
-    </div>
-  </div>
-</section>
-
-<section class="pricing" id="pricing">
-  <div class="wrap">
-    <div class="section-head" style="text-align:center; margin: 0 auto 44px;">
-      <div class="eyebrow" style="justify-content:center">Ціна</div>
-      <h2>Проста й чесна оплата</h2>
-    </div>
-    <div class="price-card">
-      <div class="amount">59 грн<sup>/чисте фото</sup></div>
-      <div class="desc">Перегляд усіх варіантів з водяним знаком — безкоштовно</div>
-      <ul>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> 3 варіанти результату для перегляду</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Оплата лише за обране фото без водяного знаку</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Без реєстрації та підписки</li>
-      </ul>
-      <a class="btn-primary" style="width:100%; justify-content:center" href="/career/photo">Спробувати</a>
     </div>
   </div>
 </section>
