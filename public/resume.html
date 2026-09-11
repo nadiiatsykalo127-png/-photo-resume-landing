@@ -52,6 +52,21 @@
           <section class="panel card form-section"><h2>Освіта</h2><div class="form"><div class="field full"><label for="education">Заклад, спеціальність, роки навчання</label><textarea id="education"></textarea></div></div></section>
           <section id="vacancySection" class="panel card form-section vacancy-panel" hidden><h2>Адаптація під вакансію</h2><p class="small">Почніть із тексту вакансії. Вкажіть достовірні посади, місця роботи, дати та освіту — обов’язки й навички можна не заповнювати. AI заповнить усі текстові розділи разом, а ви перевірите й відредагуєте результат.</p><div class="field"><textarea id="vacancy" rows="6" placeholder="Скопіюйте текст вакансії"></textarea></div><button id="adaptVacancy" class="btn">✦ Заповнити резюме під вакансію</button></section>
           <div id="aiStatus" class="status" hidden></div>
+          <section class="panel card form-section english-cv-panel">
+            <div class="section-title"><div><h2>CV англійською</h2><p class="small">Тестова версія International English CV. Після перевірки послуга коштуватиме 79 грн.</p></div></div>
+            <div class="field full"><label for="englishName">Ім’я та прізвище латиницею</label><input id="englishName" placeholder="Точно як у закордонному паспорті"><small>AI не змінюватиме й не транслітеруватиме ваше ім’я самостійно.</small></div>
+            <button id="generateEnglishCv" class="btn">✦ Створити тестове CV англійською</button>
+            <div id="englishCvStatus" class="status" hidden></div>
+            <div id="englishCvDownloads" hidden>
+              <p><b>English CV готове. Перевірте обидві версії:</b></p>
+              <div class="actions">
+                <button id="englishPdfPhoto" class="btn">PDF з фото</button>
+                <button id="englishDocPhoto" class="btn outline">DOCX з фото</button>
+                <button id="englishPdfNoPhoto" class="btn outline">PDF без фото</button>
+                <button id="englishDocNoPhoto" class="btn outline">DOCX без фото</button>
+              </div>
+            </div>
+          </section>
         </div>
         <aside class="preview-column">
           <div class="preview-actions"><button id="proofread" class="btn outline">✦ Перевірити орфографію</button><button id="pdf" class="btn">Зберегти PDF</button><button id="doc" class="btn outline">Завантажити DOCX</button><button id="clear" class="btn muted">Очистити</button></div>
@@ -64,6 +79,6 @@
     </section>
   </main>
   <div class="legal-links"><a href="/career/oferta">Публічна оферта</a><a href="/career/privacy">Конфіденційність</a><a href="https://forms.gle/Shp2k2sa2SBpRJQY7" target="_blank" rel="noopener">Зворотний зв’язок</a></div>
-  <script src="/assets/resume.js?v=20260910-1" defer></script>
+  <script src="/assets/resume.js?v=20260911-1" defer></script>
 </body>
 </html>
