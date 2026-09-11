@@ -49,6 +49,9 @@ document.querySelectorAll("[data-document]").forEach(button=>button.addEventList
   setDocumentView(button.dataset.document);
   window.scrollTo({top:0,behavior:"smooth"});
 }));
+$("openSourceResume").addEventListener("click",()=>{
+  document.querySelector('[data-document="ukrainian"]')?.click();
+});
 
 function renderLanguages(){
   const levels=["Native","C2 — Proficient","C1 — Advanced","B2 — Upper-Intermediate","B1 — Intermediate","A2 — Elementary","A1 — Beginner"];
