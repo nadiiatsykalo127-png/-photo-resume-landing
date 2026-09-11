@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/app.css?v=20260831-1">
+  <link rel="stylesheet" href="/assets/app.css?v=20260911-1">
 </head>
 <body>
   <header class="top"><div class="wrap"><a class="brand" href="/career">AI для кар’єри</a><a class="back" href="/career">← На головну</a></div></header>
@@ -54,7 +54,13 @@
           <div id="aiStatus" class="status" hidden></div>
           <section class="panel card form-section english-cv-panel">
             <div class="section-title"><div><h2>CV англійською</h2><p class="small">Тестова версія International English CV. Після перевірки послуга коштуватиме 79 грн.</p></div></div>
-            <div class="field full"><label for="englishName">Ім’я та прізвище латиницею</label><input id="englishName" placeholder="Точно як у закордонному паспорті"><small>AI не змінюватиме й не транслітеруватиме ваше ім’я самостійно.</small></div>
+            <div class="field full"><label for="englishName">Ім’я та прізвище латиницею <span class="required-mark">*</span></label><input id="englishName" placeholder="Наприклад: Hanna Monanko"><small>Вкажіть написання як у закордонному паспорті, але у звичайному регістрі.</small></div>
+            <div class="language-heading"><div><b>Мови</b><p class="small">Можна додати декілька мов. Цей розділ не є обов’язковим.</p></div><button id="addLanguage" class="text-btn" type="button">＋ Додати мову</button></div>
+            <div id="languageList" class="language-list"></div>
+            <div class="english-cv-note"><b>Не обов’язково вказувати всі місця роботи.</b><span>Схожий попередній досвід можна об’єднати: <i>Previous Accounting Experience — Various Companies</i>. Період і фактичні обов’язки все одно потрібно зазначити.</span></div>
+            <div id="englishRequiredErrors" class="validation-box error" hidden></div>
+            <div id="englishWarnings" class="validation-box warning" hidden></div>
+            <label id="englishWarningConfirmRow" class="confirm-row" hidden><input id="confirmEnglishWarnings" type="checkbox"> Я перевірила дані та хочу продовжити без необов’язкових полів.</label>
             <button id="generateEnglishCv" class="btn">✦ Створити тестове CV англійською</button>
             <div id="englishCvStatus" class="status" hidden></div>
             <div id="englishCvDownloads" hidden>
@@ -79,6 +85,6 @@
     </section>
   </main>
   <div class="legal-links"><a href="/career/oferta">Публічна оферта</a><a href="/career/privacy">Конфіденційність</a><a href="https://forms.gle/Shp2k2sa2SBpRJQY7" target="_blank" rel="noopener">Зворотний зв’язок</a></div>
-  <script src="/assets/resume.js?v=20260911-1" defer></script>
+  <script src="/assets/resume.js?v=20260911-2" defer></script>
 </body>
 </html>
