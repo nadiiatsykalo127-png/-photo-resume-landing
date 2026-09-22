@@ -15,6 +15,9 @@ const app=express();
 const port=Number(process.env.PORT||10000);
 const baseUrl=(process.env.PUBLIC_BASE_URL||"http://localhost:10000").replace(/\/$/,"");
 const dataDir=process.env.DATA_DIR||path.join(root,"data/private");
+const photoUsagePath=path.join(dataDir,".photo-usage");
+const photoCooldownMs=24*60*60*1000;
+const photoPendingMs=15*60*1000;
 const monoPaymentMode=String(process.env.MONO_PAYMENT_MODE||"live").toLowerCase();
 const getMonoToken=()=>monoPaymentMode==="test"?process.env.MONO_TEST_TOKEN:process.env.MONO_X_TOKEN;
 const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:10*1024*1024},fileFilter:(_req,file,cb)=>cb(null,["image/jpeg","image/png","image/webp"].includes(file.mimetype))});
@@ -23,6 +26,32 @@ const metaPath=id=>path.join(dataDir,`${id}.json`);
 const imagePath=(id,index)=>path.join(dataDir,`${id}-${index}.jpg`);
 async function getJob(id){try{return JSON.parse(await fs.readFile(metaPath(id),"utf8"))}catch{return null}}
 async function saveJob(id,job){await fs.writeFile(metaPath(id),JSON.stringify(job),{mode:0o600})}
+async function loadPhotoUsage(){try{return new Map(Object.entries(JSON.parse(await fs.readFile(photoUsagePath,"utf8"))))}catch{return new Map()}}
+const photoUsage=await loadPhotoUsage();
+let photoUsageWrite=Promise.resolve();
+function savePhotoUsage(){
+ const snapshot=JSON.stringify(Object.fromEntries(photoUsage));
+ photoUsageWrite=photoUsageWrite.then(async()=>{
+  const temporaryPath=`${photoUsagePath}.${process.pid}.tmp`;
+  await fs.writeFile(temporaryPath,snapshot,{mode:0o600});
+  await fs.rename(temporaryPath,photoUsagePath);
+ }).catch(error=>console.error("Could not save photo usage data",error));
+ return photoUsageWrite;
+}
+function photoClientKey(req){
+ const supplied=String(req.get("X-Photo-Client")||"").trim();
+ const browserId=/^[a-f0-9-]{20,80}$/i.test(supplied)?supplied:String(req.get("user-agent")||"unknown").slice(0,300);
+ return crypto.createHash("sha256").update(`${req.ip}|${browserId}`).digest("hex");
+}
+function getPhotoAvailability(key){
+ const now=Date.now();
+ const usage=photoUsage.get(key)||{};
+ const lastSuccessfulAt=Number(usage.lastSuccessfulAt||0);
+ const availableAt=lastSuccessfulAt?lastSuccessfulAt+photoCooldownMs:0;
+ const pendingUntil=Number(usage.pendingUntil||0);
+ return {available:availableAt<=now&&pendingUntil<=now,availableAt,remainingMs:Math.max(0,availableAt-now),pending:pendingUntil>now};
+}
+const photoUnavailableMessage="Наразі сервіс створення фото тимчасово недоступний. Будь ласка, спробуйте ще раз трохи пізніше. Ми вже працюємо над відновленням його роботи.";
 
 app.set("trust proxy",1);
 app.use(helmet({contentSecurityPolicy:false,crossOriginResourcePolicy:false}));
@@ -39,10 +68,22 @@ app.get("/career/resume",(_req,res)=>res.sendFile(path.join(root,"public/resume.
 app.get("/career/oferta",(_req,res)=>res.sendFile(path.join(root,"oferta.html")));
 app.get("/career/privacy",(_req,res)=>res.sendFile(path.join(root,"privacy.html")));
 
-app.post("/api/photo/generate",rateLimit({windowMs:10*60_000,limit:2,standardHeaders:true,legacyHeaders:false}),upload.single("photo"),async(req,res,next)=>{
+app.get("/api/photo/availability",(req,res)=>{
+ const availability=getPhotoAvailability(photoClientKey(req));
+ res.set("Cache-Control","no-store").json(availability);
+});
+
+app.post("/api/photo/generate",rateLimit({windowMs:10*60_000,limit:2,standardHeaders:true,legacyHeaders:false,message:{error:photoUnavailableMessage,code:"PHOTO_SERVICE_UNAVAILABLE"}}),upload.single("photo"),async(req,res)=>{
+ const clientKey=photoClientKey(req);
  try{
   if(!req.file)return res.status(400).json({error:"Оберіть фото у форматі JPG, PNG або WEBP."});
-  if(!process.env.GEMINI_API_KEY)return res.status(503).json({error:"Генерація буде доступна після підключення ключа AI."});
+  const availability=getPhotoAvailability(clientKey);
+  if(!availability.available){
+   if(availability.pending)return res.status(409).json({error:"Попередня генерація ще виконується. Будь ласка, зачекайте.",code:"PHOTO_GENERATION_PENDING"});
+   return res.status(429).json({error:"Ви вже використали безкоштовну генерацію.",code:"PHOTO_COOLDOWN",availableAt:availability.availableAt,remainingMs:availability.remainingMs});
+  }
+  if(!process.env.GEMINI_API_KEY)return res.status(503).json({error:photoUnavailableMessage,code:"PHOTO_SERVICE_UNAVAILABLE"});
+  photoUsage.set(clientKey,{...(photoUsage.get(clientKey)||{}),pendingUntil:Date.now()+photoPendingMs});
   const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
   const jobId=crypto.randomUUID();
   const prompt="Create a realistic professional resume headshot from this exact person. Preserve identity, facial proportions, skin tone, expression and hair. Remove glasses, hats and distracting jewelry only when present. Light blue clean studio background, soft even lighting, centered head and shoulders, vertical 3:4 composition. Dress the person in a plain white button-down business shirt only. No jacket, no blazer, no cardigan, no vest, no tie, and no dark outerwear. All three variations must use the same plain white shirt. Do not add text, logos or decorative elements.";
@@ -58,8 +99,18 @@ app.post("/api/photo/generate",rateLimit({windowMs:10*60_000,limit:2,standardHea
   for(let i=0;i<clean.length;i++){const preview=await sharp(clean[i]).resize(900,1200,{fit:"cover"}).composite([{input:watermark,blend:"over"}]).jpeg({quality:78}).toBuffer();previews.push({id:String(i),data:`data:image/jpeg;base64,${preview.toString("base64")}`})}
   await Promise.all(clean.map((buffer,index)=>fs.writeFile(imagePath(jobId,index),buffer,{mode:0o600})));
   await saveJob(jobId,{selected:null,paid:false,createdAt:Date.now(),invoiceId:null});
-  res.json({jobId,previews});
- }catch(error){next(error)}
+  const generatedAt=Date.now();
+  const availableAt=generatedAt+photoCooldownMs;
+  photoUsage.set(clientKey,{lastSuccessfulAt:generatedAt,pendingUntil:0});
+  await savePhotoUsage();
+  res.json({jobId,previews,availableAt});
+ }catch(error){
+  const usage=photoUsage.get(clientKey)||{};
+  photoUsage.set(clientKey,{...usage,pendingUntil:0});
+  void savePhotoUsage();
+  console.error("Photo generation failed",{status:Number(error?.status||error?.error?.code||0),message:error?.message});
+  res.status(503).json({error:photoUnavailableMessage,code:"PHOTO_SERVICE_UNAVAILABLE"});
+ }
 });
 
 app.post("/api/payment/create",async(req,res,next)=>{
@@ -132,6 +183,12 @@ app.post("/api/resume/docx",async(req,res,next)=>{try{
   res.set({"Content-Type":"application/vnd.openxmlformats-officedocument.wordprocessingml.document","Content-Disposition":'attachment; filename="nadinartdigital.com.ua.docx"',"Cache-Control":"no-store"}).send(buffer);
 }catch(error){next(error)}});
 
-setInterval(async()=>{const cutoff=Date.now()-24*60*60*1000;for(const file of (await fs.readdir(dataDir)).filter(name=>name.endsWith(".json"))){const id=file.slice(0,-5),job=await getJob(id);if(job?.createdAt<cutoff){await Promise.allSettled([0,1,2].map(index=>fs.unlink(imagePath(id,index))));await fs.unlink(metaPath(id)).catch(()=>{})}}},60*60*1000).unref();
+setInterval(async()=>{
+ const cutoff=Date.now()-24*60*60*1000;
+ for(const file of (await fs.readdir(dataDir)).filter(name=>/^[0-9a-f-]{36}\.json$/i.test(name))){const id=file.slice(0,-5),job=await getJob(id);if(job?.createdAt<cutoff){await Promise.allSettled([0,1,2].map(index=>fs.unlink(imagePath(id,index))));await fs.unlink(metaPath(id)).catch(()=>{})}}
+ let usageChanged=false;
+ for(const [key,usage] of photoUsage){if(Number(usage.lastSuccessfulAt||0)+photoCooldownMs<Date.now()&&Number(usage.pendingUntil||0)<Date.now()){photoUsage.delete(key);usageChanged=true}}
+ if(usageChanged)await savePhotoUsage();
+},60*60*1000).unref();
 app.use((error,_req,res,_next)=>{console.error(error);res.status(500).json({error:"Виникла технічна помилка. Спробуйте ще раз пізніше."})});
 app.listen(port,"0.0.0.0",()=>console.log(`AI career service listening on ${port}`));
