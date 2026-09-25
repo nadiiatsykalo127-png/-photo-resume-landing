@@ -1,3 +1,13 @@
+// Google Analytics is loaded here because the photo page is intentionally compact.
+window.dataLayer=window.dataLayer||[];
+window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};
+const googleTag=document.createElement('script');
+googleTag.async=true;
+googleTag.src='https://www.googletagmanager.com/gtag/js?id=G-43B80N7WHF';
+document.head.append(googleTag);
+window.gtag('js',new Date());
+window.gtag('config','G-43B80N7WHF');
+
 const file=document.querySelector('#file'),preview=document.querySelector('#preview'),empty=document.querySelector('#empty'),fileLabel=document.querySelector('#fileLabel'),generate=document.querySelector('#generate'),statusBox=document.querySelector('#status'),results=document.querySelector('#results'),pay=document.querySelector('#pay');let selected='',jobId='',chosenFile=null,cooldownTimer=null,cooldownAvailableAt=0;
 const photoClientId=(()=>{const key='photoClientId';let id=localStorage.getItem(key);if(!id){id=crypto.randomUUID();localStorage.setItem(key,id)}return id})();
 const photoHeaders={'X-Photo-Client':photoClientId};
