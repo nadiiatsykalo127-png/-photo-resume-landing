@@ -61,6 +61,21 @@ app.use("/assets",express.static(path.join(root,"public/assets"),{maxAge:"1d"}))
 for(const image of ["before.jpg","after1.jpg","after2.jpg","after3.jpg","veteran-handshake.jpg"]){app.get(`/${image}`,(_req,res)=>res.sendFile(path.join(root,image)))}
 
 app.get("/health",(_req,res)=>res.json({ok:true}));
+app.get("/robots.txt",(_req,res)=>res.type("text/plain").send([
+ "User-agent: *",
+ "Allow: /",
+ "Disallow: /api/",
+ "Sitemap: https://nadinartdigital.com.ua/sitemap.xml",
+ ""
+].join("\n")));
+app.get("/sitemap.xml",(_req,res)=>res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://nadinartdigital.com.ua/career</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://nadinartdigital.com.ua/career/photo</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://nadinartdigital.com.ua/career/resume</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://nadinartdigital.com.ua/career/oferta</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://nadinartdigital.com.ua/career/privacy</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+</urlset>`));
 app.get("/",(_req,res)=>res.redirect(302,"/career"));
 app.get("/career",(_req,res)=>res.sendFile(path.join(root,"index.html")));
 app.get("/career/photo",(_req,res)=>res.sendFile(path.join(root,"public/photo.html")));
